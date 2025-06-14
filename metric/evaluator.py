@@ -321,7 +321,7 @@ class ReturnException(Exception):
         self.value = value
 
 
-def evaluate_function_call(env: Environment, call: FunctionCall) -> RuntimeValue:  # noqa: C901
+def evaluate_function_call(env: Environment, call: FunctionCall) -> RuntimeValue:
     if not env.has_function(call.name):
         raise EvaluationError(f"Undefined function: {call.name}")
     func_decl = env.get_function(call.name)
@@ -352,7 +352,7 @@ def evaluate_function_call(env: Environment, call: FunctionCall) -> RuntimeValue
 # Statement execution (cost tracked where appropriate)
 # ---------------------------------------------------------------------------
 
-def execute_statement(env: Environment, stmt: Statement) -> Tuple[Environment, Optional[RuntimeValue | List[RuntimeValue]]]:  # noqa: C901
+def execute_statement(env: Environment, stmt: Statement) -> Tuple[Environment, Optional[RuntimeValue | List[RuntimeValue]]]:
     match stmt:
         # let binding
         case Let(name=name, expression=expression):

@@ -7,7 +7,7 @@ This is a Python implementation of the Metric programming language - a simple st
 ```
 ├── metric/        # Core library modules
 │   ├── __init__.py      # Package initialization with exports
-│   ├── __main__.py      # Main entry point (python -m metric)
+│   ├── __main__.py      # Main entry point (metric)
 │   ├── metric_ast.py    # Abstract syntax tree definitions with type annotations
 │   ├── tokenizer.py     # Lexical analysis with strict whitespace validation
 │   ├── parser.py        # Recursive descent parser building typed AST
@@ -25,13 +25,13 @@ This is a Python implementation of the Metric programming language - a simple st
 ### Run Metric programs:
 ```bash
 # Run a specific .metric file
-python -m metric examples/demo.metric
-python -m metric examples/fibonacci.metric
-python -m metric examples/factorial.metric
+metric examples/demo.metric
+metric examples/fibonacci.metric
+metric examples/factorial.metric
 
 
 # Show help and available examples
-python -m metric
+metric
 ```
 
 ### Run tests:

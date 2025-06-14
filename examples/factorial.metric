@@ -1,8 +1,8 @@
 let n integer = 5
 let result integer = 1
 print n
-# iteration 
-     
+# iteration
+
 while n > 1
     set result = result * n
     set n = n - 1

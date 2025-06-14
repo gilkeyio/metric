@@ -26,7 +26,7 @@ def run_program(program_text: str) -> None:
         type_check(ast)
 
         with timer():
-            output, operation_count = execute(ast)
+            _, operation_count = execute(ast)
 
         print(f"Operation count: {operation_count}")
 
