@@ -130,8 +130,7 @@ def tokenize(input_str: str) -> list[TokenType]:
 
 def tokenize_line(line_content: str, line_num: int) -> list[TokenType]:
     """Tokenize a single line of content."""
-    if not line_content:
-        return []
+    assert line_content, "line_content should not be empty"
     
     # Check for comments first
     comment_pos = line_content.find('#')
@@ -151,8 +150,7 @@ def tokenize_line(line_content: str, line_num: int) -> list[TokenType]:
 
 def tokenize_line_without_comments(line_content: str, line_num: int) -> list[TokenType]:
     """Tokenize a single line of content without comments."""
-    if not line_content:
-        return []
+    assert line_content, "line_content should not be empty"
     
     tokens: list[TokenType] = []
     i = 0
