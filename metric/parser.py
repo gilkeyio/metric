@@ -1,5 +1,5 @@
 from __future__ import annotations
-from typing import Tuple, List, Union, Callable
+from typing import Tuple, List, Callable
 from .metric_ast import *
 from .tokenizer import Token, IntegerToken, IdentifierToken, FloatToken, TokenType
 
@@ -392,7 +392,7 @@ def _parse_indented_block(tokens: List[TokenType]) -> Tuple[List[Statement], Lis
     return statements, remaining
 
 
-def _parse_type_annotation(token: Union[Token, IntegerToken, FloatToken, IdentifierToken]) -> Type:
+def _parse_type_annotation(token: Token | IntegerToken | FloatToken | IdentifierToken) -> Type:
     """Parse a type annotation token and return the corresponding Type."""
     if token == Token.INTEGER_TYPE:
         return Type.INTEGER
@@ -404,7 +404,7 @@ def _parse_type_annotation(token: Union[Token, IntegerToken, FloatToken, Identif
         raise ParseError("Expected type annotation (integer, boolean, or float)")
 
 
-def _parse_type(tokens: List[TokenType]) -> Tuple[Union[Type, ListType], List[TokenType]]:
+def _parse_type(tokens: List[TokenType]) -> Tuple[Type | ListType, List[TokenType]]:
     """Parse a type from tokens and return the type and remaining tokens."""
     if not tokens:
         raise ParseError("Expected type")

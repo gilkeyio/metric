@@ -1,6 +1,6 @@
 from enum import Enum
 from dataclasses import dataclass
-from typing import List, Union
+from typing import List
 
 
 class Token(Enum):
@@ -74,7 +74,7 @@ class TokenizerError(Exception):
     pass
 
 
-TokenType = Union[Token, IntegerToken, FloatToken, IdentifierToken]
+TokenType = Token | IntegerToken | FloatToken | IdentifierToken
 
 
 class CharacterStream:

@@ -1,7 +1,7 @@
 from __future__ import annotations
 from enum import Enum
 from dataclasses import dataclass
-from typing import List, Union, TYPE_CHECKING, Any
+from typing import List, TYPE_CHECKING, Any
 
 if TYPE_CHECKING:
     from .visitor import ASTVisitor
@@ -132,13 +132,13 @@ class LenCall:
         return visitor.visit_len_call(self)
 
 
-Expression = Union[IntegerLiteral, Variable, BooleanLiteral, FloatLiteral, BinaryExpression, UnaryExpression, FunctionCall, ListLiteral, ListAccess, RepeatCall, LenCall]
+Expression = IntegerLiteral | Variable | BooleanLiteral | FloatLiteral | BinaryExpression | UnaryExpression | FunctionCall | ListLiteral | ListAccess | RepeatCall | LenCall
 
 
 @dataclass(frozen=True)
 class Let:
     name: str
-    type_annotation: Union[Type, ListType]
+    type_annotation: Type | ListType
     expression: Expression
     
     def accept(self, visitor: ASTVisitor) -> Any:
@@ -201,14 +201,14 @@ class Comment:
 @dataclass(frozen=True)
 class Parameter:
     name: str
-    type_annotation: Union[Type, ListType]
+    type_annotation: Type | ListType
 
 
 @dataclass(frozen=True)
 class FunctionDeclaration:
     name: str
     parameters: List[Parameter]
-    return_type: Union[Type, ListType]
+    return_type: Type | ListType
     body: List[Statement]
     
     def accept(self, visitor: ASTVisitor) -> Any:
@@ -223,6 +223,6 @@ class Return:
         return visitor.visit_return(self)
 
 
-Statement = Union[Let, Print, If, While, Set, ListAssignment, Comment, FunctionDeclaration, Return]
+Statement = Let | Print | If | While | Set | ListAssignment | Comment | FunctionDeclaration | Return
 
 AbstractSyntaxTree = List[Statement]

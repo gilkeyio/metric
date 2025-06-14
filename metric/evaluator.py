@@ -10,7 +10,7 @@ This keeps the language semantics intact while giving you a simple, portable cos
 """
 
 from __future__ import annotations
-from typing import Dict, List, Optional, Sequence, Tuple, Union
+from typing import Dict, List, Optional, Sequence, Tuple
 from .metric_ast import *  
 
 
@@ -18,18 +18,18 @@ class EvaluationError(Exception):
     """Run‑time error reported to the user program."""
 
 
-RuntimeValue = Union[int, bool, float, List[Union[int, bool, float]]]
+RuntimeValue = int | bool | float | List[int | bool | float]
 
 
 # Type narrowing helper functions for safe operations
-def ensure_numeric(value: RuntimeValue) -> Union[int, float]:
+def ensure_numeric(value: RuntimeValue) -> int | float:
     """Ensure value is numeric (int or float) for arithmetic operations."""
     if not isinstance(value, (int, float)):
         raise EvaluationError(f"Expected number, got {type(value).__name__}")
     return value
 
 
-def ensure_list(value: RuntimeValue) -> List[Union[int, bool, float]]:
+def ensure_list(value: RuntimeValue) -> List[int | bool | float]:
     """Ensure value is a list for list operations."""
     if not isinstance(value, list):
         raise EvaluationError(f"Expected list, got {type(value).__name__}")
@@ -259,7 +259,7 @@ def evaluate_expression(env: Environment, expr: Expression) -> RuntimeValue:
         # list literal – treat construction as 1 cost (plus cost of each element eval inside recursion)
         if isinstance(e, ListLiteral):
             env.increment_cost()
-            result: List[Union[int, bool, float]] = []
+            result: List[int | bool | float] = []
             for el in e.elements:
                 el_val = eval_expr(el)
                 if not isinstance(el_val, (int, bool, float)):
@@ -346,7 +346,7 @@ def evaluate_function_call(env: Environment, call: FunctionCall) -> RuntimeValue
 # Statement execution (cost tracked where appropriate)
 # ---------------------------------------------------------------------------
 
-def execute_statement(env: Environment, stmt: Statement) -> Tuple[Environment, Optional[Union[RuntimeValue, List[RuntimeValue]]]]:  # noqa: C901
+def execute_statement(env: Environment, stmt: Statement) -> Tuple[Environment, Optional[RuntimeValue | List[RuntimeValue]]]:  # noqa: C901
     # let binding
     if isinstance(stmt, Let):
         if env.mem(stmt.name):
@@ -457,7 +457,7 @@ def execute(ast: AbstractSyntaxTree) -> Tuple[Sequence[RuntimeValue], int]:
     env = Environment.empty()
     results: List[RuntimeValue] = []
 
-    def collect(stmt_res: Optional[Union[RuntimeValue, List[RuntimeValue]]]):
+    def collect(stmt_res: Optional[RuntimeValue | List[RuntimeValue]]):
         if isinstance(stmt_res, list):
             results.extend(stmt_res)
         elif stmt_res is not None:

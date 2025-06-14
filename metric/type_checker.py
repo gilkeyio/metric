@@ -1,4 +1,4 @@
-from typing import Dict, Tuple, List, Union
+from typing import Dict, Tuple, List
 from .metric_ast import *
 from .visitor import ASTVisitor
 
@@ -9,9 +9,9 @@ class TypeCheckError(Exception):
 
 class TypeCheckVisitor(ASTVisitor):
     def __init__(self):
-        self.symbol_table: Dict[str, Union[Type, ListType]] = {}
-        self.function_table: Dict[str, Tuple[List[Union[Type, ListType]], Union[Type, ListType]]] = {}  # name -> (param_types, return_type)
-        self.current_function_return_type: Union[Type, ListType] = None  # Track return type for current function
+        self.symbol_table: Dict[str, Type | ListType] = {}
+        self.function_table: Dict[str, Tuple[List[Type | ListType], Type | ListType]] = {}  # name -> (param_types, return_type)
+        self.current_function_return_type: Type | ListType | None = None  # Track return type for current function
     
     def check_program(self, ast: AbstractSyntaxTree) -> None:
         """Type check an entire program."""
@@ -112,7 +112,7 @@ class TypeCheckVisitor(ASTVisitor):
     def visit_float_literal(self, node: FloatLiteral) -> Type:
         return Type.FLOAT
     
-    def visit_variable(self, node: Variable) -> Union[Type, ListType]:
+    def visit_variable(self, node: Variable) -> Type | ListType:
         if node.name not in self.symbol_table:
             raise TypeCheckError(f"Variable '{node.name}' is not declared")
         return self.symbol_table[node.name]
@@ -244,7 +244,7 @@ class TypeCheckVisitor(ASTVisitor):
             got_type_str = self._type_to_string(expr_type)
             raise TypeCheckError(f"Return type mismatch: expected {expected_type_str}, got {got_type_str}")
     
-    def visit_function_call(self, func_call: FunctionCall) -> Union[Type, ListType]:
+    def visit_function_call(self, func_call: FunctionCall) -> Type | ListType:
         """Type check a function call and return its type."""
         # Check if function is declared
         if func_call.name not in self.function_table:
@@ -330,7 +330,7 @@ class TypeCheckVisitor(ASTVisitor):
         
         return Type.INTEGER
     
-    def _types_equal(self, type1: Union[Type, ListType], type2: Union[Type, ListType]) -> bool:
+    def _types_equal(self, type1: Type | ListType, type2: Type | ListType) -> bool:
         """Check if two types are equal."""
         if isinstance(type1, ListType) and isinstance(type2, ListType):
             return self._types_equal(type1.element_type, type2.element_type)
@@ -339,7 +339,7 @@ class TypeCheckVisitor(ASTVisitor):
         else:
             return False
     
-    def _type_to_string(self, type_obj: Union[Type, ListType]) -> str:
+    def _type_to_string(self, type_obj: Type | ListType) -> str:
         """Convert a type to a string representation."""
         if isinstance(type_obj, ListType):
             elem_type_str = self._type_to_string(type_obj.element_type)
