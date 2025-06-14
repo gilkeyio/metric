@@ -1,5 +1,5 @@
 from __future__ import annotations
-from typing import Tuple, List, Callable
+from typing import Callable
 from .metric_ast import *
 from .tokenizer import Token, IntegerToken, IdentifierToken, FloatToken, TokenType
 
@@ -8,7 +8,7 @@ class ParseError(Exception):
     pass
 
 
-def parse_binary_rest(left_expr: Expression, tokens: List[TokenType], operators: dict[Token, BinaryOperator], next_level_parser: Callable[[List[TokenType]], Tuple[Expression, List[TokenType]]]) -> Tuple[Expression, List[TokenType]]:
+def parse_binary_rest(left_expr: Expression, tokens: list[TokenType], operators: dict[Token, BinaryOperator], next_level_parser: Callable[[list[TokenType]], tuple[Expression, list[TokenType]]]) -> tuple[Expression, list[TokenType]]:
     """Generic helper for left-associative binary operators."""
     while tokens and isinstance(tokens[0], Token) and tokens[0] in operators:
         op_token = tokens[0]
@@ -20,7 +20,7 @@ def parse_binary_rest(left_expr: Expression, tokens: List[TokenType], operators:
 
 
 
-def parse_factor(tokens: List[TokenType]) -> Tuple[Expression, List[TokenType]]:
+def parse_factor(tokens: list[TokenType]) -> tuple[Expression, list[TokenType]]:
     """Parse factor: integer | float | identifier | boolean | '(' expression ')'"""
     if not tokens:
         raise ParseError("Expected integer, float, identifier, boolean, or opening parenthesis")
@@ -39,7 +39,7 @@ def parse_factor(tokens: List[TokenType]) -> Tuple[Expression, List[TokenType]]:
             remaining = remaining[1:]  # consume '('
             
             # Parse arguments
-            arguments: List[Expression] = []
+            arguments: list[Expression] = []
             if remaining and remaining[0] != Token.RIGHT_PARENTHESIS:
                 # Parse first argument
                 arg_expr, remaining = parse_expression(remaining)
@@ -85,7 +85,7 @@ def parse_factor(tokens: List[TokenType]) -> Tuple[Expression, List[TokenType]]:
     elif tokens[0] == Token.LEFT_BRACKET:
         # Parse list literal: [expr, expr, ...]
         remaining = tokens[1:]  # consume '['
-        elements: List[Expression] = []
+        elements: list[Expression] = []
         
         # Handle empty list
         if remaining and remaining[0] == Token.RIGHT_BRACKET:
@@ -150,7 +150,7 @@ def parse_factor(tokens: List[TokenType]) -> Tuple[Expression, List[TokenType]]:
         raise ParseError("Expected integer, float, identifier, boolean, or opening parenthesis")
 
 
-def parse_multiplicative_expression(tokens: List[TokenType]) -> Tuple[Expression, List[TokenType]]:
+def parse_multiplicative_expression(tokens: list[TokenType]) -> tuple[Expression, list[TokenType]]:
     """Parse multiplicative expression: factor (('*' | '/' | '%') factor)*"""
     left_expr, remaining = parse_factor(tokens)
     
@@ -163,7 +163,7 @@ def parse_multiplicative_expression(tokens: List[TokenType]) -> Tuple[Expression
     return parse_binary_rest(left_expr, remaining, operators, parse_factor)
 
 
-def parse_additive_expression(tokens: List[TokenType]) -> Tuple[Expression, List[TokenType]]:
+def parse_additive_expression(tokens: list[TokenType]) -> tuple[Expression, list[TokenType]]:
     """Parse additive expression: multiplicative (('+' | '-') multiplicative)*"""
     left_expr, remaining = parse_multiplicative_expression(tokens)
     
@@ -175,7 +175,7 @@ def parse_additive_expression(tokens: List[TokenType]) -> Tuple[Expression, List
     return parse_binary_rest(left_expr, remaining, operators, parse_multiplicative_expression)
 
 
-def parse_comparison_expression(tokens: List[TokenType]) -> Tuple[Expression, List[TokenType]]:
+def parse_comparison_expression(tokens: list[TokenType]) -> tuple[Expression, list[TokenType]]:
     """Parse comparison expression: additive (('<' | '>' | '<=' | '>=' | '==' | '!=') additive)*"""
     left_expr, remaining = parse_additive_expression(tokens)
     
@@ -191,7 +191,7 @@ def parse_comparison_expression(tokens: List[TokenType]) -> Tuple[Expression, Li
     return parse_binary_rest(left_expr, remaining, operators, parse_additive_expression)
 
 
-def parse_unary_logical_expression(tokens: List[TokenType]) -> Tuple[Expression, List[TokenType]]:
+def parse_unary_logical_expression(tokens: list[TokenType]) -> tuple[Expression, list[TokenType]]:
     """Parse unary logical expression: 'not' unary_logical | comparison"""
     if tokens and tokens[0] == Token.NOT:
         # Parse 'not' unary expression
@@ -201,7 +201,7 @@ def parse_unary_logical_expression(tokens: List[TokenType]) -> Tuple[Expression,
         return parse_comparison_expression(tokens)
 
 
-def parse_logical_and_expression(tokens: List[TokenType]) -> Tuple[Expression, List[TokenType]]:
+def parse_logical_and_expression(tokens: list[TokenType]) -> tuple[Expression, list[TokenType]]:
     """Parse logical AND expression: unary_logical ('and' unary_logical)*"""
     left_expr, remaining = parse_unary_logical_expression(tokens)
     
@@ -212,7 +212,7 @@ def parse_logical_and_expression(tokens: List[TokenType]) -> Tuple[Expression, L
     return parse_binary_rest(left_expr, remaining, operators, parse_unary_logical_expression)
 
 
-def parse_logical_or_expression(tokens: List[TokenType]) -> Tuple[Expression, List[TokenType]]:
+def parse_logical_or_expression(tokens: list[TokenType]) -> tuple[Expression, list[TokenType]]:
     """Parse logical OR expression: logical_and ('or' logical_and)*"""
     left_expr, remaining = parse_logical_and_expression(tokens)
     
@@ -223,12 +223,12 @@ def parse_logical_or_expression(tokens: List[TokenType]) -> Tuple[Expression, Li
     return parse_binary_rest(left_expr, remaining, operators, parse_logical_and_expression)
 
 
-def parse_expression(tokens: List[TokenType]) -> Tuple[Expression, List[TokenType]]:
+def parse_expression(tokens: list[TokenType]) -> tuple[Expression, list[TokenType]]:
     """Parse expression: logical OR expression"""
     return parse_logical_or_expression(tokens)
 
 
-def parse_statement(tokens: List[TokenType]) -> Tuple[Statement, List[TokenType]]:
+def parse_statement(tokens: list[TokenType]) -> tuple[Statement, list[TokenType]]:
     """Parse statement: let statement | print statement | if statement | while statement | set statement | comment"""
     if not tokens:
         raise ParseError("Expected 'let', 'print', 'if', 'while', 'set', 'def', 'return', or comment statement")
@@ -255,7 +255,7 @@ def parse_statement(tokens: List[TokenType]) -> Tuple[Statement, List[TokenType]
         raise ParseError("Expected 'let', 'print', 'if', 'while', 'set', 'def', 'return', or comment statement")
 
 
-def _parse_let_statement(tokens: List[TokenType]) -> Tuple[Statement, List[TokenType]]:
+def _parse_let_statement(tokens: list[TokenType]) -> tuple[Statement, list[TokenType]]:
     """Parse let statement: 'let' identifier type '=' expression"""
     if len(tokens) < 5 or not isinstance(tokens[1], IdentifierToken):
         raise ParseError("Expected 'let identifier type = expression'")
@@ -272,13 +272,13 @@ def _parse_let_statement(tokens: List[TokenType]) -> Tuple[Statement, List[Token
     return Let(name, type_annotation, expr), remaining
 
 
-def _parse_print_statement(tokens: List[TokenType]) -> Tuple[Statement, List[TokenType]]:
+def _parse_print_statement(tokens: list[TokenType]) -> tuple[Statement, list[TokenType]]:
     """Parse print statement: 'print' expression"""
     expr, remaining = parse_expression(tokens[1:])
     return Print(expr), remaining
 
 
-def _parse_set_statement(tokens: List[TokenType]) -> Tuple[Statement, List[TokenType]]:
+def _parse_set_statement(tokens: list[TokenType]) -> tuple[Statement, list[TokenType]]:
     """Parse set statement: 'set' identifier '=' expression | 'set' identifier '[' expression ']' '=' expression"""
     if len(tokens) < 4 or not isinstance(tokens[1], IdentifierToken):
         raise ParseError("Expected 'set identifier = expression'")
@@ -317,7 +317,7 @@ def _parse_set_statement(tokens: List[TokenType]) -> Tuple[Statement, List[Token
         raise ParseError("Expected 'set identifier = expression'")
 
 
-def _parse_comment_statement(tokens: List[TokenType]) -> Tuple[Statement, List[TokenType]]:
+def _parse_comment_statement(tokens: list[TokenType]) -> tuple[Statement, list[TokenType]]:
     """Parse comment statement: just consume the comment token"""
     if not tokens or tokens[0] != Token.COMMENT:
         raise ParseError("Expected comment")
@@ -325,21 +325,21 @@ def _parse_comment_statement(tokens: List[TokenType]) -> Tuple[Statement, List[T
     return Comment(), tokens[1:]
 
 
-def parse_if_statement(tokens: List[TokenType]) -> Tuple[Statement, List[TokenType]]:
+def parse_if_statement(tokens: list[TokenType]) -> tuple[Statement, list[TokenType]]:
     """Parse if statement: 'if' expression STATEMENT_SEPARATOR INDENT statements DEDENT"""
     condition, body, remaining = _parse_control_flow_statement(tokens, Token.IF, "if")
     return If(condition, body), remaining
 
 
-def parse_while_statement(tokens: List[TokenType]) -> Tuple[Statement, List[TokenType]]:
+def parse_while_statement(tokens: list[TokenType]) -> tuple[Statement, list[TokenType]]:
     """Parse while statement: 'while' expression STATEMENT_SEPARATOR INDENT statements DEDENT"""
     condition, body, remaining = _parse_control_flow_statement(tokens, Token.WHILE, "while")
     return While(condition, body), remaining
 
 
-def _parse_control_flow_statement(tokens: List[TokenType], 
+def _parse_control_flow_statement(tokens: list[TokenType], 
                                  expected_token: Token, 
-                                 statement_name: str) -> Tuple[Expression, List[Statement], List[TokenType]]:
+                                 statement_name: str) -> tuple[Expression, list[Statement], list[TokenType]]:
     """Parse a control flow statement (if/while) with condition and indented body."""
     if not tokens or tokens[0] != expected_token:
         raise ParseError(f"Expected '{statement_name}'")
@@ -373,9 +373,9 @@ def _parse_control_flow_statement(tokens: List[TokenType],
     return condition, body_statements, remaining
 
 
-def _parse_indented_block(tokens: List[TokenType]) -> Tuple[List[Statement], List[TokenType]]:
+def _parse_indented_block(tokens: list[TokenType]) -> tuple[list[Statement], list[TokenType]]:
     """Parse an indented block of statements and return statements plus remaining tokens."""
-    statements: List[Statement] = []
+    statements: list[Statement] = []
     remaining = tokens
     
     while remaining and remaining[0] != Token.DEDENT:
@@ -404,7 +404,7 @@ def _parse_type_annotation(token: Token | IntegerToken | FloatToken | Identifier
         raise ParseError("Expected type annotation (integer, boolean, or float)")
 
 
-def _parse_type(tokens: List[TokenType]) -> Tuple[Type | ListType, List[TokenType]]:
+def _parse_type(tokens: list[TokenType]) -> tuple[Type | ListType, list[TokenType]]:
     """Parse a type from tokens and return the type and remaining tokens."""
     if not tokens:
         raise ParseError("Expected type")
@@ -422,9 +422,9 @@ def _parse_type(tokens: List[TokenType]) -> Tuple[Type | ListType, List[TokenTyp
         return type_annotation, tokens[1:]
 
 
-def parse_statements(tokens: List[TokenType]) -> List[Statement]:
+def parse_statements(tokens: list[TokenType]) -> list[Statement]:
     """Parse sequence of statements separated by statement separators."""
-    statements: List[Statement] = []
+    statements: list[Statement] = []
     
     while tokens:
         # Skip statement separators at the beginning
@@ -443,7 +443,7 @@ def parse_statements(tokens: List[TokenType]) -> List[Statement]:
     return statements
 
 
-def _parse_function_declaration(tokens: List[TokenType]) -> Tuple[Statement, List[TokenType]]:
+def _parse_function_declaration(tokens: list[TokenType]) -> tuple[Statement, list[TokenType]]:
     """Parse function declaration: 'def' identifier '(' parameters ')' 'returns' type body"""
     if len(tokens) < 6:
         raise ParseError("Expected 'def identifier(parameters) returns type'")
@@ -489,7 +489,7 @@ def _parse_function_declaration(tokens: List[TokenType]) -> Tuple[Statement, Lis
     remaining_after_type = remaining_after_type[1:]
     
     # Parse function body statements
-    body: List[Statement] = []
+    body: list[Statement] = []
     while remaining_after_type and remaining_after_type[0] != Token.DEDENT:
         stmt, remaining_after_type = parse_statement(remaining_after_type)
         body.append(stmt)
@@ -505,9 +505,9 @@ def _parse_function_declaration(tokens: List[TokenType]) -> Tuple[Statement, Lis
     return function_decl, remaining_after_type
 
 
-def _parse_parameter_list(tokens: List[TokenType]) -> Tuple[List[Parameter], List[TokenType]]:
+def _parse_parameter_list(tokens: list[TokenType]) -> tuple[list[Parameter], list[TokenType]]:
     """Parse parameter list: parameter (',' parameter)*"""
-    parameters: List[Parameter] = []
+    parameters: list[Parameter] = []
     
     # Handle empty parameter list
     if tokens and tokens[0] == Token.RIGHT_PARENTHESIS:
@@ -546,7 +546,7 @@ def _parse_parameter_list(tokens: List[TokenType]) -> Tuple[List[Parameter], Lis
     return parameters, tokens
 
 
-def _parse_return_statement(tokens: List[TokenType]) -> Tuple[Statement, List[TokenType]]:
+def _parse_return_statement(tokens: list[TokenType]) -> tuple[Statement, list[TokenType]]:
     """Parse return statement: 'return' expression"""
     if len(tokens) < 2:
         raise ParseError("Expected 'return expression'")
@@ -560,7 +560,7 @@ def _parse_return_statement(tokens: List[TokenType]) -> Tuple[Statement, List[To
     return Return(expression), remaining
 
 
-def parse(tokens: List[TokenType]) -> AbstractSyntaxTree:
+def parse(tokens: list[TokenType]) -> AbstractSyntaxTree:
     """Parse tokens into an abstract syntax tree."""
     statements = parse_statements(tokens)
     return statements

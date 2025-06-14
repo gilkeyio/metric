@@ -1,7 +1,5 @@
 from enum import Enum
 from dataclasses import dataclass
-from typing import List
-
 
 class Token(Enum):
     INTEGER = "Integer"
@@ -120,10 +118,10 @@ def validate_identifier(identifier: str) -> None:
         if not char.isalpha():
             raise TokenizerError(f"Identifier contains invalid character: {identifier}")
 
-def tokenize(input_str: str) -> List[TokenType]:
+def tokenize(input_str: str) -> list[TokenType]:
     """Tokenize input string into list of tokens with indentation handling."""
     lines = input_str.split('\n')
-    tokens: List[TokenType] = []
+    tokens: list[TokenType] = []
     indent_stack = [0]  # Stack to track indentation levels
     
     for line_num, line in enumerate(lines, 1):
@@ -173,7 +171,7 @@ def tokenize(input_str: str) -> List[TokenType]:
     
     return tokens
 
-def tokenize_line(line_content: str, line_num: int) -> List[TokenType]:
+def tokenize_line(line_content: str, line_num: int) -> list[TokenType]:
     """Tokenize a single line of content."""
     if not line_content:
         return []
@@ -183,7 +181,7 @@ def tokenize_line(line_content: str, line_num: int) -> List[TokenType]:
     if comment_pos != -1:
         # Tokenize the part before the comment (if any)
         code_part = line_content[:comment_pos].rstrip()
-        tokens: List[TokenType] = []
+        tokens: list[TokenType] = []
         if code_part:
             tokens = tokenize_line_without_comments(code_part, line_num)
         
@@ -194,12 +192,12 @@ def tokenize_line(line_content: str, line_num: int) -> List[TokenType]:
     # No comments, tokenize normally
     return tokenize_line_without_comments(line_content, line_num)
 
-def tokenize_line_without_comments(line_content: str, line_num: int) -> List[TokenType]:
+def tokenize_line_without_comments(line_content: str, line_num: int) -> list[TokenType]:
     """Tokenize a single line of content without comments."""
     if not line_content:
         return []
     
-    tokens: List[TokenType] = []
+    tokens: list[TokenType] = []
     i = 0
     
     while i < len(line_content):
