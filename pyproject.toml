@@ -3,7 +3,7 @@ requires = ["hatchling"]
 build-backend = "hatchling.build"
 
 [project]
-name = "metric-lang"
+name = "metric"
 version = "0.1.0"
 description = "A simple statically-typed programming language for deterministic algorithm performance testing"
 authors = [{name = "Kimberly Gilkey", email = "kim@gilkey.io"}]
