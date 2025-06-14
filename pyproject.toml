@@ -32,6 +32,11 @@ Repository = "https://github.com/gilkeyio/metric"
 Issues = "https://github.com/gilkeyio/metric/issues"
 
 
+[project.optional-dependencies]
+dev = [
+    "mypy>=1.16.0",
+]
+
 [tool.mypy]
 python_version = "3.13"
 strict = true
