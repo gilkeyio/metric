@@ -5,14 +5,15 @@ Eliminates duplicated dispatch logic across type checker and evaluator.
 from __future__ import annotations
 from abc import ABC, abstractmethod
 
-from typing import Any
+from typing import Any, TYPE_CHECKING
 
-from .metric_ast import (
-    Let, Set, ListAssignment, Print, If, While, Comment,
-    FunctionDeclaration, Return, BinaryExpression, UnaryExpression,
-    IntegerLiteral, FloatLiteral, BooleanLiteral, Variable,
-    FunctionCall, ListLiteral, ListAccess, RepeatCall, LenCall
-)
+if TYPE_CHECKING:
+    from .metric_ast import (
+        Let, Set, ListAssignment, Print, If, While, Comment,
+        FunctionDeclaration, Return, BinaryExpression, UnaryExpression,
+        IntegerLiteral, FloatLiteral, BooleanLiteral, Variable,
+        FunctionCall, ListLiteral, ListAccess, RepeatCall, LenCall
+    )
 
 
 class ASTVisitor(ABC):
