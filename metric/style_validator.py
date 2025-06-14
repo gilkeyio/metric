@@ -6,7 +6,7 @@ post-tokenization, using both the original source code and tokenized output
 to enforce strict formatting rules.
 """
 
-from typing import List, Union
+from typing import List
 from .tokenizer import Token, IntegerToken, FloatToken, IdentifierToken
 
 
@@ -15,7 +15,7 @@ class StyleError(Exception):
     pass
 
 
-def validate_style(source_code: str, tokens: List[Union[Token, IntegerToken, FloatToken, IdentifierToken]]) -> None:
+def validate_style(source_code: str, tokens: List[Token | IntegerToken | FloatToken | IdentifierToken]) -> None:
     """
     Validate the style and whitespace of Metric source code.
     
@@ -161,7 +161,7 @@ def _validate_multiple_statements_per_line(input_str: str) -> None:
             current_pos = word_pos + len(word)
 
 
-def _validate_token_spacing(source_code: str, tokens: List[Union[Token, IntegerToken, FloatToken, IdentifierToken]]) -> None:
+def _validate_token_spacing(source_code: str, tokens: List[Token | IntegerToken | FloatToken | IdentifierToken]) -> None:
     """
     Validate token-level spacing rules using both source and tokens.
     

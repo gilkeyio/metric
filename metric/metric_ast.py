@@ -1,6 +1,10 @@
+from __future__ import annotations
 from enum import Enum
 from dataclasses import dataclass
-from typing import List, Union
+from typing import List, TYPE_CHECKING, Any
+
+if TYPE_CHECKING:
+    from .visitor import ASTVisitor
 
 
 class Type(Enum):
@@ -38,7 +42,7 @@ class UnaryOperator(Enum):
 class IntegerLiteral:
     value: int
     
-    def accept(self, visitor):
+    def accept(self, visitor: ASTVisitor) -> Any:
         return visitor.visit_integer_literal(self)
 
 
@@ -46,7 +50,7 @@ class IntegerLiteral:
 class Variable:
     name: str
     
-    def accept(self, visitor):
+    def accept(self, visitor: ASTVisitor) -> Any:
         return visitor.visit_variable(self)
 
 
@@ -54,7 +58,7 @@ class Variable:
 class BooleanLiteral:
     value: bool
     
-    def accept(self, visitor):
+    def accept(self, visitor: ASTVisitor) -> Any:
         return visitor.visit_boolean_literal(self)
 
 
@@ -62,82 +66,82 @@ class BooleanLiteral:
 class FloatLiteral:
     value: float
     
-    def accept(self, visitor):
+    def accept(self, visitor: ASTVisitor) -> Any:
         return visitor.visit_float_literal(self)
 
 
 @dataclass(frozen=True)
 class BinaryExpression:
-    left: 'Expression'
+    left: Expression
     operator: BinaryOperator
-    right: 'Expression'
+    right: Expression
     
-    def accept(self, visitor):
+    def accept(self, visitor: ASTVisitor) -> Any:
         return visitor.visit_binary_op(self)
 
 
 @dataclass(frozen=True)
 class UnaryExpression:
     operator: UnaryOperator
-    operand: 'Expression'
+    operand: Expression
     
-    def accept(self, visitor):
+    def accept(self, visitor: ASTVisitor) -> Any:
         return visitor.visit_unary_op(self)
 
 
 @dataclass(frozen=True)
 class FunctionCall:
     name: str
-    arguments: List['Expression']
+    arguments: List[Expression]
     
-    def accept(self, visitor):
+    def accept(self, visitor: ASTVisitor) -> Any:
         return visitor.visit_function_call(self)
 
 
 @dataclass(frozen=True)
 class ListLiteral:
-    elements: List['Expression']
+    elements: List[Expression]
     
-    def accept(self, visitor):
+    def accept(self, visitor: ASTVisitor) -> Any:
         return visitor.visit_list_literal(self)
 
 
 @dataclass(frozen=True)
 class ListAccess:
-    list_expr: 'Expression'
-    index: 'Expression'
+    list_expr: Expression
+    index: Expression
     
-    def accept(self, visitor):
+    def accept(self, visitor: ASTVisitor) -> Any:
         return visitor.visit_list_access(self)
 
 
 @dataclass(frozen=True)
 class RepeatCall:
-    value: 'Expression'
-    count: 'Expression'
+    value: Expression
+    count: Expression
     
-    def accept(self, visitor):
+    def accept(self, visitor: ASTVisitor) -> Any:
         return visitor.visit_repeat_call(self)
 
 
 @dataclass(frozen=True)
 class LenCall:
-    list_expr: 'Expression'
+    list_expr: Expression
     
-    def accept(self, visitor):
+    def accept(self, visitor: ASTVisitor) -> Any:
         return visitor.visit_len_call(self)
 
 
-Expression = Union[IntegerLiteral, Variable, BooleanLiteral, FloatLiteral, BinaryExpression, UnaryExpression, FunctionCall, ListLiteral, ListAccess, RepeatCall, LenCall]
+Expression = IntegerLiteral | Variable | BooleanLiteral | FloatLiteral | BinaryExpression | UnaryExpression | FunctionCall | ListLiteral | ListAccess | RepeatCall | LenCall
 
 
 @dataclass(frozen=True)
 class Let:
     name: str
-    type_annotation: Union[Type, ListType]
+    type_annotation: Type | ListType
     expression: Expression
     
-    def accept(self, visitor):
+    def accept(self, visitor: ASTVisitor) -> Any:
         return visitor.visit_let(self)
 
 
@@ -145,25 +149,25 @@ class Let:
 class Print:
     expression: Expression
     
-    def accept(self, visitor):
+    def accept(self, visitor: ASTVisitor) -> Any:
         return visitor.visit_print(self)
 
 
 @dataclass(frozen=True)
 class If:
     condition: Expression
-    body: List['Statement']
+    body: List[Statement]
     
-    def accept(self, visitor):
+    def accept(self, visitor: ASTVisitor) -> Any:
         return visitor.visit_if(self)
 
 
 @dataclass(frozen=True)
 class While:
     condition: Expression
-    body: List['Statement']
+    body: List[Statement]
     
-    def accept(self, visitor):
+    def accept(self, visitor: ASTVisitor) -> Any:
         return visitor.visit_while(self)
 
 
@@ -172,7 +176,7 @@ class Set:
     name: str
     expression: Expression
     
-    def accept(self, visitor):
+    def accept(self, visitor: ASTVisitor) -> Any:
         return visitor.visit_set(self)
 
 
@@ -182,7 +186,7 @@ class ListAssignment:
     index: Expression
     value: Expression
     
-    def accept(self, visitor):
+    def accept(self, visitor: ASTVisitor) -> Any:
         return visitor.visit_list_assignment(self)
 
 
@@ -190,24 +194,24 @@ class ListAssignment:
 class Comment:
     pass
     
-    def accept(self, visitor):
+    def accept(self, visitor: ASTVisitor) -> Any:
         return visitor.visit_comment(self)
 
 
 @dataclass(frozen=True)
 class Parameter:
     name: str
-    type_annotation: Union[Type, ListType]
+    type_annotation: Type | ListType
 
 
 @dataclass(frozen=True)
 class FunctionDeclaration:
     name: str
     parameters: List[Parameter]
-    return_type: Union[Type, ListType]
-    body: List['Statement']
+    return_type: Type | ListType
+    body: List[Statement]
     
-    def accept(self, visitor):
+    def accept(self, visitor: ASTVisitor) -> Any:
         return visitor.visit_function_declaration(self)
 
 
@@ -215,10 +219,10 @@ class FunctionDeclaration:
 class Return:
     expression: Expression
     
-    def accept(self, visitor):
+    def accept(self, visitor: ASTVisitor) -> Any:
         return visitor.visit_return(self)
 
 
-Statement = Union[Let, Print, If, While, Set, ListAssignment, Comment, FunctionDeclaration, Return]
+Statement = Let | Print | If | While | Set | ListAssignment | Comment | FunctionDeclaration | Return
 
 AbstractSyntaxTree = List[Statement]
