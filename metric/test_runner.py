@@ -10,7 +10,7 @@ import sys
 import os
 import argparse
 
-def main():
+def main() -> None:
     """Run tests for the Metric project."""
     parser = argparse.ArgumentParser(description='Run tests for the Metric programming language')
     parser.add_argument('pattern', nargs='?', default='test_*.py',
