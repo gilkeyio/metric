@@ -1,15 +1,10 @@
 #!/usr/bin/env python3
 
 import unittest
-import sys
-import os
-
-# Add the test directory to Python path for imports
-sys.path.insert(0, os.path.dirname(__file__))
 
 from metric.style_validator import StyleError, validate_style
 from metric.tokenizer import tokenize
-from test_utils import code_block
+from test.test_utils import code_block
 
 
 class TestStyleValidation(unittest.TestCase):

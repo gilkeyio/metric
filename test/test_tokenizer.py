@@ -1,13 +1,8 @@
 #!/usr/bin/env python3
-
-import sys
-import os
-sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
-
 import unittest
 
 from metric.tokenizer import TokenType, tokenize, Token, IntegerToken, IdentifierToken, FloatToken, TokenizerError
-from test_utils import code_block
+from test.test_utils import code_block
 
 
 class TestTokenizer(unittest.TestCase):

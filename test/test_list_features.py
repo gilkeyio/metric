@@ -1,9 +1,6 @@
 #!/usr/bin/env python3
 
 import sys
-import os
-sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..'))
-
 from typing import Sequence
 import unittest
 from io import StringIO
@@ -12,7 +9,7 @@ from metric.tokenizer import tokenize
 from metric.parser import parse, ParseError
 from metric.type_checker import type_check, TypeCheckError
 from metric.evaluator import RuntimeValue, execute, EvaluationError
-from test_utils import code_block
+from test.test_utils import code_block
 
 
 class TestListFeatures(unittest.TestCase):

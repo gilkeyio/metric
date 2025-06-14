@@ -41,4 +41,4 @@ dev = [
 [tool.mypy]
 python_version = "3.13"
 strict = true
-packages = ["metric"]
+packages = ["metric", "test"]

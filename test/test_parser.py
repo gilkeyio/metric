@@ -1,16 +1,10 @@
 #!/usr/bin/env python3
 
-import sys
-import os
 import unittest
-
-# Add the test directory to Python path for imports
-sys.path.insert(0, os.path.dirname(__file__))
-
 from metric.parser import parse, ParseError
 from metric.tokenizer import TokenType, tokenize, Token, IntegerToken, IdentifierToken
 from metric.metric_ast import *
-from test_utils import code_block
+from test.test_utils import code_block
 from typing import List, Sequence
 
 

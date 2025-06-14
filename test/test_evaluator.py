@@ -3,19 +3,16 @@
 import sys
 from typing import Generator
 import unittest
-import os
 from contextlib import contextmanager
 from io import StringIO
 
-# Add the test directory to Python path for imports
-sys.path.insert(0, os.path.dirname(__file__))
 
 from metric.metric_ast import *
 from metric.evaluator import Environment, evaluate_expression, execute_statement, execute, EvaluationError
 from metric.tokenizer import tokenize
 from metric.parser import parse
 from metric.type_checker import type_check
-from test_utils import code_block
+from test.test_utils import code_block
 
 
 class TestEvaluator(unittest.TestCase):
