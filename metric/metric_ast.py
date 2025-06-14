@@ -1,7 +1,7 @@
 from __future__ import annotations
 from enum import Enum
 from dataclasses import dataclass
-from typing import List, TYPE_CHECKING, Any, Sequence
+from typing import TYPE_CHECKING, Any, Sequence
 
 if TYPE_CHECKING:
     from .visitor import ASTVisitor
@@ -92,7 +92,7 @@ class UnaryExpression:
 @dataclass(frozen=True)
 class FunctionCall:
     name: str
-    arguments: List[Expression]
+    arguments: list[Expression]
     
     def accept(self, visitor: ASTVisitor) -> Any:
         return visitor.visit_function_call(self)
@@ -100,7 +100,7 @@ class FunctionCall:
 
 @dataclass(frozen=True)
 class ListLiteral:
-    elements: List[Expression]
+    elements: list[Expression]
     
     def accept(self, visitor: ASTVisitor) -> Any:
         return visitor.visit_list_literal(self)
@@ -156,7 +156,7 @@ class Print:
 @dataclass(frozen=True)
 class If:
     condition: Expression
-    body: List[Statement]
+    body: list[Statement]
     
     def accept(self, visitor: ASTVisitor) -> Any:
         return visitor.visit_if(self)
@@ -165,7 +165,7 @@ class If:
 @dataclass(frozen=True)
 class While:
     condition: Expression
-    body: List[Statement]
+    body: list[Statement]
     
     def accept(self, visitor: ASTVisitor) -> Any:
         return visitor.visit_while(self)
@@ -207,9 +207,9 @@ class Parameter:
 @dataclass(frozen=True)
 class FunctionDeclaration:
     name: str
-    parameters: List[Parameter]
+    parameters: list[Parameter]
     return_type: Type | ListType
-    body: List[Statement]
+    body: list[Statement]
     
     def accept(self, visitor: ASTVisitor) -> Any:
         return visitor.visit_function_declaration(self)

@@ -1,4 +1,3 @@
-from typing import Dict, Tuple, List
 from .metric_ast import *
 from .visitor import ASTVisitor
 
@@ -9,8 +8,8 @@ class TypeCheckError(Exception):
 
 class TypeCheckVisitor(ASTVisitor):
     def __init__(self) -> None:
-        self.symbol_table: Dict[str, Type | ListType] = {}
-        self.function_table: Dict[str, Tuple[List[Type | ListType], Type | ListType]] = {}  # name -> (param_types, return_type)
+        self.symbol_table: dict[str, Type | ListType] = {}
+        self.function_table: dict[str, tuple[list[Type | ListType], Type | ListType]] = {}  # name -> (param_types, return_type)
         self.current_function_return_type: Type | ListType | None = None  # Track return type for current function
     
     def check_program(self, ast: AbstractSyntaxTree) -> None:
@@ -97,7 +96,7 @@ class TypeCheckVisitor(ASTVisitor):
         if cond_type != Type.BOOLEAN:
             raise TypeCheckError(f"{statement_type} condition must be boolean, got {cond_type.value.lower()}")
     
-    def _check_statement_body(self, statements: List[Statement]) -> None:
+    def _check_statement_body(self, statements: list[Statement]) -> None:
         """Type check a list of statements."""
         for stmt in statements:
             stmt.accept(self)

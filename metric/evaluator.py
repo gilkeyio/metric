@@ -4,13 +4,13 @@ Changes vs. previous version
 ----------------------------
 * `Environment` now tracks a `_cost` counter and exposes `increment_cost()` / `cost()`.
 * Every semantic operation (variable read/write, arithmetic, logic, list ops, function call, etc.) increments the counter by **1**.
-* `execute()` now returns a tuple `(results: List[RuntimeValue], cost: int)` so callers can inspect the total operation count.
+* `execute()` now returns a tuple `(results: list[RuntimeValue], cost: int)` so callers can inspect the total operation count.
 
 This keeps the language semantics intact while giving you a simple, portable cost model suitable for algorithmic comparison.
 """
 
 from __future__ import annotations
-from typing import Dict, List, Optional, Sequence, Tuple
+from typing import Optional, Sequence
 from .metric_ast import *  
 
 
@@ -18,7 +18,7 @@ class EvaluationError(Exception):
     """Run‑time error reported to the user program."""
 
 
-RuntimeValue = int | bool | float | List[int | bool | float]
+RuntimeValue = int | bool | float | list[int | bool | float]
 
 
 # Type narrowing helper functions for safe operations
@@ -29,7 +29,7 @@ def ensure_numeric(value: RuntimeValue) -> int | float:
     return value
 
 
-def ensure_list(value: RuntimeValue) -> List[int | bool | float]:
+def ensure_list(value: RuntimeValue) -> list[int | bool | float]:
     """Ensure value is a list for list operations."""
     if not isinstance(value, list):
         raise EvaluationError(f"Expected list, got {type(value).__name__}")
@@ -58,11 +58,11 @@ class Environment:
     every copy sees the same running tally.
     """
 
-    def __init__(self, cost_ref: Optional[List[int]] = None):
-        self._env: Dict[str, RuntimeValue] = {}
-        self._functions: Dict[str, FunctionDeclaration] = {}
+    def __init__(self, cost_ref: Optional[list[int]] = None):
+        self._env: dict[str, RuntimeValue] = {}
+        self._functions: dict[str, FunctionDeclaration] = {}
         # use a one‑element list so that copies share the same counter object
-        self._cost_ref: List[int] = cost_ref if cost_ref is not None else [0]
+        self._cost_ref: list[int] = cost_ref if cost_ref is not None else [0]
 
     # ---------------------------------------------------------------------
     # cost utilities
@@ -73,13 +73,13 @@ class Environment:
     def cost(self) -> int:
         return self._cost_ref[0]
     
-    def get_cost_ref(self) -> List[int]:
+    def get_cost_ref(self) -> list[int]:
         return self._cost_ref
     
-    def get_functions(self) -> Dict[str, FunctionDeclaration]:
+    def get_functions(self) -> dict[str, FunctionDeclaration]:
         return self._functions
     
-    def set_functions(self, functions: Dict[str, FunctionDeclaration]) -> None:
+    def set_functions(self, functions: dict[str, FunctionDeclaration]) -> None:
         self._functions = functions.copy()
 
     # ---------------------------------------------------------------------
@@ -264,7 +264,7 @@ def evaluate_expression(env: Environment, expr: Expression) -> RuntimeValue:
             # list literal – treat construction as 1 cost (plus cost of each element eval inside recursion)
             case ListLiteral(elements=elements):
                 env.increment_cost()
-                result: List[int | bool | float] = []
+                result: list[int | bool | float] = []
                 for el in elements:
                     el_val = eval_expr(el)
                     if not isinstance(el_val, (int, bool, float)):
@@ -352,7 +352,7 @@ def evaluate_function_call(env: Environment, call: FunctionCall) -> RuntimeValue
 # Statement execution (cost tracked where appropriate)
 # ---------------------------------------------------------------------------
 
-def execute_statement(env: Environment, stmt: Statement) -> Tuple[Environment, Optional[RuntimeValue | List[RuntimeValue]]]:
+def execute_statement(env: Environment, stmt: Statement) -> tuple[Environment, Optional[RuntimeValue | list[RuntimeValue]]]:
     match stmt:
         # let binding
         case Let(name=name, expression=expression):
@@ -407,7 +407,7 @@ def execute_statement(env: Environment, stmt: Statement) -> Tuple[Environment, O
             env.increment_cost()  # condition test
             if cond:
                 cur = env
-                if_results: List[RuntimeValue] = []
+                if_results: list[RuntimeValue] = []
                 for body_stmt in body:
                     cur, r = execute_statement(cur, body_stmt)
                     if isinstance(r, list):
@@ -420,7 +420,7 @@ def execute_statement(env: Environment, stmt: Statement) -> Tuple[Environment, O
         # while
         case While(condition=condition, body=body):
             cur = env
-            while_results: List[RuntimeValue] = []
+            while_results: list[RuntimeValue] = []
             while True:
                 cond_val = evaluate_expression(cur, condition)
                 if not isinstance(cond_val, bool):
@@ -460,12 +460,12 @@ def execute_statement(env: Environment, stmt: Statement) -> Tuple[Environment, O
 # Program entry point
 # ---------------------------------------------------------------------------
 
-def execute(ast: AbstractSyntaxTree) -> Tuple[Sequence[RuntimeValue], int]:
+def execute(ast: AbstractSyntaxTree) -> tuple[Sequence[RuntimeValue], int]:
     """Execute a whole programme and return (print_results, total_cost)."""
     env = Environment.empty()
-    results: List[RuntimeValue] = []
+    results: list[RuntimeValue] = []
 
-    def collect(stmt_res: Optional[RuntimeValue | List[RuntimeValue]]) -> None:
+    def collect(stmt_res: Optional[RuntimeValue | list[RuntimeValue]]) -> None:
         if isinstance(stmt_res, list):
             results.extend(stmt_res)
         elif stmt_res is not None:
