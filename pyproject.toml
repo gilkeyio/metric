@@ -25,6 +25,7 @@ classifiers = [
 
 [project.scripts]
 metric = "metric.__main__:main"
+metric-test = "metric.test_runner:main"
 
 [project.urls]
 Homepage = "https://github.com/gilkeyio/metric"
@@ -36,6 +37,7 @@ Issues = "https://github.com/gilkeyio/metric/issues"
 dev = [
     "mypy>=1.16.0",
 ]
+
 
 [tool.mypy]
 python_version = "3.13"
