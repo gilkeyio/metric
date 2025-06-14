@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 """Main entry point for the Metric language interpreter."""
 
+from typing import Generator
 from . import tokenize, parse, execute, TokenizerError, ParseError, EvaluationError
 from .type_checker import type_check, TypeCheckError
 from .style_validator import validate_style, StyleError
@@ -11,7 +12,7 @@ import time
 from contextlib import contextmanager
 
 @contextmanager
-def timer():
+def timer() -> Generator[None, None, None]:
     start = time.perf_counter()
     yield
     print(f"Execution time: {time.perf_counter() - start:.4f} seconds")
@@ -67,7 +68,7 @@ def run_file(filepath: str) -> None:
         sys.exit(1)
 
 
-def main():
+def main() -> None:
     """Main entry point with argument parsing."""
     parser = argparse.ArgumentParser(
         description="Metric Programming Language Interpreter",

@@ -8,7 +8,7 @@ class TypeCheckError(Exception):
 
 
 class TypeCheckVisitor(ASTVisitor):
-    def __init__(self):
+    def __init__(self) -> None:
         self.symbol_table: Dict[str, Type | ListType] = {}
         self.function_table: Dict[str, Tuple[List[Type | ListType], Type | ListType]] = {}  # name -> (param_types, return_type)
         self.current_function_return_type: Type | ListType | None = None  # Track return type for current function
@@ -350,7 +350,7 @@ class TypeCheckVisitor(ASTVisitor):
 
 class TypeChecker:
     """Compatibility wrapper for the visitor-based type checker."""
-    def __init__(self):
+    def __init__(self) -> None:
         self.visitor = TypeCheckVisitor()
     
     def check_program(self, ast: AbstractSyntaxTree) -> None:

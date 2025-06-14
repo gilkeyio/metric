@@ -288,16 +288,16 @@ def evaluate_expression(env: Environment, expr: Expression) -> RuntimeValue:
 
             # repeat(value, n)
             case RepeatCall(value=value, count=count):
-                val = eval_expr(value)
+                repeat_val: RuntimeValue = eval_expr(value)
                 count_val = eval_expr(count)
                 if not isinstance(count_val, int):
                     raise EvaluationError("Repeat count must be integer")
                 if count_val < 0:
                     raise EvaluationError("Repeat count cannot be negative")
-                if not isinstance(val, (int, bool, float)):
-                    raise EvaluationError(f"Repeat value must be int, bool, or float, got {type(val).__name__}")
+                if not isinstance(repeat_val, (int, bool, float)):
+                    raise EvaluationError(f"Repeat value must be int, bool, or float, got {type(repeat_val).__name__}")
                 env.increment_cost()
-                return [val] * count_val
+                return [repeat_val] * count_val
 
             # len(list)
             case LenCall(list_expr=list_expr):
@@ -465,7 +465,7 @@ def execute(ast: AbstractSyntaxTree) -> Tuple[Sequence[RuntimeValue], int]:
     env = Environment.empty()
     results: List[RuntimeValue] = []
 
-    def collect(stmt_res: Optional[RuntimeValue | List[RuntimeValue]]):
+    def collect(stmt_res: Optional[RuntimeValue | List[RuntimeValue]]) -> None:
         if isinstance(stmt_res, list):
             results.extend(stmt_res)
         elif stmt_res is not None:
