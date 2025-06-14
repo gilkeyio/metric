@@ -1,0 +1,14 @@
+let a integer = 0
+let b integer = 1
+let count integer = 10
+let next integer = 0
+
+print a
+print b
+
+while count > 0
+    set next = a + b
+    print next
+    set a = b
+    set b = next
+    set count = count - 1

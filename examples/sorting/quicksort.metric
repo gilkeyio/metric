@@ -1,0 +1,56 @@
+def copyslice(src list of integer, start integer, end integer) returns list of integer
+    let length integer = end - start
+    let out list of integer = repeat(0, length)
+    let i integer = 0
+    while i < length
+        set out[i] = src[start + i]
+        set i = i + 1
+    return out
+
+def concat(a list of integer, b list of integer) returns list of integer
+    let total integer = len(a) + len(b)
+    let out list of integer = repeat(0, total)
+    let i integer = 0
+    let j integer = 0
+    while i < len(a)
+        set out[i] = a[i]
+        set i = i + 1
+    set j = 0
+    while j < len(b)
+        set out[len(a) + j] = b[j]
+        set j = j + 1
+    return out
+
+def trim(arr list of integer, size integer) returns list of integer
+    return copyslice(arr, 0, size)
+
+def quicksort(arr list of integer) returns list of integer
+    if len(arr) <= 1
+        return arr
+    let pivot integer = arr[0]
+    let n integer = len(arr)
+    let less list of integer = repeat(0, n)
+    let greater list of integer = repeat(0, n)
+    let lcount integer = 0
+    let gcount integer = 0
+    let i integer = 1
+    while i < n
+        if arr[i] < pivot
+            set less[lcount] = arr[i]
+            set lcount = lcount + 1
+        if arr[i] >= pivot
+            set greater[gcount] = arr[i]
+            set gcount = gcount + 1
+        set i = i + 1
+    let trimmedless list of integer = trim(less, lcount)
+    let trimmedgreater list of integer = trim(greater, gcount)
+    let sortedless list of integer = quicksort(trimmedless)
+    let sortedgreater list of integer = quicksort(trimmedgreater)
+    let pivotlist list of integer = repeat(pivot, 1)
+    let temp list of integer = concat(sortedless, pivotlist)
+    let result list of integer = concat(temp, sortedgreater)
+    return result
+
+let numbers list of integer = [847, 392, 156, 923, 671, 234, 789, 512, 365, 198, 741, 456, 829, 673, 217, 584, 936, 128, 472, 695, 318, 753, 441, 867, 209, 596, 374, 812, 459, 623, 187, 748, 935, 361, 526, 694, 278, 513, 847, 692, 435, 169, 756, 921, 384, 617, 243, 785, 458, 632, 897, 174, 529, 763, 416, 658, 291, 537, 824, 479, 635, 182, 746, 913, 367, 594, 228, 751, 486, 639, 195, 768, 542, 817, 463, 629, 396, 754, 218, 563, 849, 472, 628, 391, 745, 517, 862, 439, 673, 286, 594, 738, 451, 826, 369, 617, 254, 789, 425, 638]
+let sorted list of integer = quicksort(numbers)
+print sorted

@@ -1,0 +1,77 @@
+# Logical Operators Demo
+# Demonstrates the 'and' and 'or' operators in the Metric language
+
+# Basic logical operations
+print true and true
+print true and false
+print false and true
+print false and false
+
+print true or true
+print true or false
+print false or true
+print false or false
+
+# Variables with logical operators
+let a boolean = true
+let b boolean = false
+print a and b
+print a or b
+
+# Logical operators in expressions
+let x integer = 10
+let y integer = 5
+let result boolean = x > 5 and y < 10
+print result
+
+let anotherResult boolean = x < 5 or y > 0
+print anotherResult
+
+# Operator precedence (and binds tighter than or)
+let precedenceTest boolean = true or false and false
+print precedenceTest
+
+# Complex expressions
+let age integer = 25
+let hasJob boolean = true
+let hasLicense boolean = true
+let income integer = 50000
+
+let canGetLoan boolean = age >= 18 and hasJob and income > 30000
+print canGetLoan
+
+let needsTransport boolean = hasJob or age > 16
+print needsTransport
+
+# Using logical operators in control flow
+if age >= 18 and hasLicense
+    print 999
+
+if hasJob and income > 40000
+    print 777
+
+let scoreOne integer = 85
+let scoreTwo integer = 92
+if scoreOne > 80 and scoreTwo > 90
+    print 555
+
+# Logical operators with comparison chains
+let temp integer = 75
+let humidity integer = 60
+let isComfortable boolean = temp >= 70 and temp <= 80 and humidity < 70
+print isComfortable
+
+# Functions returning booleans for logical operations
+def isAdult(ageValue integer) returns boolean
+    return ageValue >= 18
+
+def hasHighIncome(incomeValue integer) returns boolean
+    return incomeValue > 50000
+
+let personAge integer = 25
+let personIncome integer = 60000
+let qualified boolean = isAdult(personAge) and hasHighIncome(personIncome)
+print qualified
+
+if isAdult(personAge) or hasHighIncome(personIncome)
+    print 333

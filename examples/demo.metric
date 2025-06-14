@@ -1,0 +1,35 @@
+let x integer = 5
+print x
+let y integer = x + 3
+print y
+print 2 + 3 * 4
+let isLarge boolean = x > 3
+print isLarge
+if isLarge
+    print x
+    let bonus integer = 10
+    print bonus
+let isFalse boolean = false
+print isFalse
+if isFalse
+    print 999
+print 888
+
+# Logical operators demo
+let a boolean = true
+let b boolean = false
+print a and b
+print a or b
+print true and true
+print false or false
+
+# Complex logical expressions
+let age integer = 25
+let hasLicense boolean = true
+let canDrive boolean = age >= 18 and hasLicense
+print canDrive
+
+if age > 21 and hasLicense
+    print 999
+if age < 16 or hasLicense == false
+    print 111

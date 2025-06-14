@@ -1,0 +1,46 @@
+def add(x integer, y integer) returns integer
+    return x + y
+
+def multiply(a integer, b integer) returns integer
+    return a * b
+
+def factorial(n integer) returns integer
+    if n <= 1
+        return 1
+    return n * factorial(n - 1)
+
+let sum integer = add(5, 10)
+print sum
+
+let product integer = multiply(6, 7)
+print product
+
+let fact integer = factorial(5)
+print fact
+
+let combined integer = add(multiply(2, 3), factorial(3))
+print combined
+
+# Functions with logical operators
+def isEven(n integer) returns boolean
+    return n % 2 == 0
+
+def isPositive(n integer) returns boolean
+    return n > 0
+
+def isEvenAndPositive(n integer) returns boolean
+    return isEven(n) and isPositive(n)
+
+def isValidScore(score integer) returns boolean
+    return score >= 0 and score <= 100
+
+let num integer = 8
+print isEven(num)
+print isPositive(num)
+print isEvenAndPositive(num)
+
+let score integer = 85
+print isValidScore(score)
+
+if isEven(num) and isPositive(num)
+    print 999
