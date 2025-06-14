@@ -6,9 +6,8 @@ sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..'))
 
 import unittest
 from io import StringIO
-import sys
 
-from metric.tokenizer import tokenize, TokenizerError
+from metric.tokenizer import tokenize
 from metric.parser import parse, ParseError
 from metric.type_checker import type_check, TypeCheckError
 from metric.evaluator import execute, EvaluationError
@@ -18,7 +17,7 @@ from test_utils import code_block
 class TestListFeatures(unittest.TestCase):
     """Comprehensive integration tests for list features."""
     
-    def _run_code(self, code):
+    def _run_code(self, code: str):
         """Helper to run code through full pipeline and capture output."""
         tokens = tokenize(code)
         ast = parse(tokens)
@@ -29,13 +28,13 @@ class TestListFeatures(unittest.TestCase):
         sys.stdout = captured_output
         
         try:
-            results = execute(ast)[0]
+            _ = execute(ast)[0]
             output = captured_output.getvalue().strip()
-            return results, output
+            return _, output
         finally:
             sys.stdout = old_stdout
     
-    def _expect_error(self, code, error_type, error_keyword):
+    def _expect_error(self, code: str, error_type: type[Exception], error_keyword: str):
         """Helper to expect a specific error."""
         try:
             self._run_code(code)
@@ -56,10 +55,10 @@ class TestListFeatures(unittest.TestCase):
             print nums[2]
         """)
         
-        results, output = self._run_code(code)
+        _, output = self._run_code(code)
         expected_output = "[1, 2, 3, 4, 5]\n5\n1\n5\n[1, 2, 99, 4, 5]\n99"
         self.assertEqual(output, expected_output)
-        self.assertEqual(results, [1, 2, 3, 4, 5, 5, 1, 5, 1, 2, 99, 4, 5, 99])
+        self.assertEqual(_, [1, 2, 3, 4, 5, 5, 1, 5, 1, 2, 99, 4, 5, 99])
     
     def test_list_with_repeat_function(self):
         """Test repeat function creates correct lists."""
@@ -73,7 +72,7 @@ class TestListFeatures(unittest.TestCase):
             print zeros
         """)
         
-        results, output = self._run_code(code)
+        _, output = self._run_code(code)
         expected_output = "[0, 0, 0, 0]\n4\n[true, true, true]\n[0, 42, 0, 0]"
         self.assertEqual(output, expected_output)
     
@@ -88,7 +87,7 @@ class TestListFeatures(unittest.TestCase):
             print computed
         """)
         
-        results, output = self._run_code(code)
+        _, output = self._run_code(code)
         expected_output = "[11, 40, 30]\n[200, 40, 30]"
         self.assertEqual(output, expected_output)
     
@@ -104,7 +103,7 @@ class TestListFeatures(unittest.TestCase):
             print nums
         """)
         
-        results, output = self._run_code(code)
+        _, output = self._run_code(code)
         expected_output = "1\n2\n3\n[2, 4, 6]"
         self.assertEqual(output, expected_output)
     
@@ -120,7 +119,7 @@ class TestListFeatures(unittest.TestCase):
             print nums
         """)
         
-        results, output = self._run_code(code)
+        _, output = self._run_code(code)
         expected_output = "5\n100\n[5, 100, 15]"
         self.assertEqual(output, expected_output)
     
@@ -147,7 +146,7 @@ class TestListFeatures(unittest.TestCase):
             print sumlist(newlist)
         """)
         
-        results, output = self._run_code(code)
+        _, output = self._run_code(code)
         expected_output = "15\n[42, 42, 42]\n126"
         self.assertEqual(output, expected_output)
     
@@ -165,7 +164,7 @@ class TestListFeatures(unittest.TestCase):
             print data
         """)
         
-        results, output = self._run_code(code)
+        _, output = self._run_code(code)
         expected_output = "10\n30\n50\n[10, 20, 999, 40, 50]"
         self.assertEqual(output, expected_output)
     
@@ -183,7 +182,7 @@ class TestListFeatures(unittest.TestCase):
             print allfalse
         """)
         
-        results, output = self._run_code(code)
+        _, output = self._run_code(code)
         expected_output = "[true, false, true, false]\n4\ntrue\nfalse\n[true, true, true, false]\n[false, false]"
         self.assertEqual(output, expected_output)
     
@@ -198,7 +197,7 @@ class TestListFeatures(unittest.TestCase):
             print len(fromrepeat)
         """)
         
-        results, output = self._run_code(code)
+        _, output = self._run_code(code)
         expected_output = "[]\n0\n[]\n0"
         self.assertEqual(output, expected_output)
     
@@ -223,7 +222,7 @@ class TestListFeatures(unittest.TestCase):
             print single
         """)
         
-        results, output = self._run_code(code)
+        _, output = self._run_code(code)
         expected_output = "3\n[1]"
         self.assertEqual(output, expected_output)
     
@@ -309,7 +308,7 @@ class TestListFeatures(unittest.TestCase):
             print doubled
         """)
         
-        results, output = self._run_code(code)
+        _, output = self._run_code(code)
         expected_lines = [
             "[3, 1, 4, 1, 5, 9, 2, 6]",
             "8",

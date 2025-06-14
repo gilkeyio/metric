@@ -124,12 +124,12 @@ class TestEvaluator(unittest.TestCase):
             self.assertEqual(captured_output.getvalue().strip(), "99")
     
     def test_execute_single_statement(self):
-        ast = [Let("x", Type.INTEGER, IntegerLiteral(5))]
+        ast: list[Statement] = [Let("x", Type.INTEGER, IntegerLiteral(5))]
         results = execute(ast)[0]
         self.assertEqual(results, [])
     
     def test_execute_multiple_statements(self):
-        ast = [
+        ast: list[Statement] = [
             Let("x", Type.INTEGER, IntegerLiteral(10)),
             Let("y", Type.INTEGER, IntegerLiteral(5)),
             Print(BinaryExpression(Variable("x"), BinaryOperator.ADDITION, Variable("y")))
@@ -141,7 +141,7 @@ class TestEvaluator(unittest.TestCase):
             self.assertEqual(captured_output.getvalue().strip(), "15")
     
     def test_execute_complex_program(self):
-        ast = [
+        ast: list[Statement] = [
             Let("a", Type.INTEGER, IntegerLiteral(2)),
             Let("b", Type.INTEGER, IntegerLiteral(3)),
             Let("c", Type.INTEGER, BinaryExpression(Variable("a"), BinaryOperator.MULTIPLICATION, Variable("b"))),
@@ -156,7 +156,7 @@ class TestEvaluator(unittest.TestCase):
             self.assertEqual(output_lines, ["6", "16"])
     
     def test_execute_variable_redefinition_error(self):
-        ast = [
+        ast: list[Statement] = [
             Let("x", Type.INTEGER, IntegerLiteral(5)),
             Print(Variable("x")),
             Let("x", Type.INTEGER, IntegerLiteral(10)),  # This should fail
@@ -431,7 +431,7 @@ class TestEvaluator(unittest.TestCase):
     
     # Boolean execution tests
     def test_execute_print_boolean(self):
-        ast = [Print(BooleanLiteral(True))]
+        ast: list[Statement] = [Print(BooleanLiteral(True))]
         
         with self.capture_stdout() as captured_output:
             results = execute(ast)[0]
@@ -440,7 +440,7 @@ class TestEvaluator(unittest.TestCase):
             self.assertEqual(output_lines, "true")
     
     def test_execute_boolean_assignment_and_comparison(self):
-        ast = [
+        ast: list[Statement] = [
             Let("x", Type.INTEGER, IntegerLiteral(10)),
             Let("y", Type.INTEGER, IntegerLiteral(5)),
             Let("result", Type.BOOLEAN, BinaryExpression(Variable("x"), BinaryOperator.GREATER_THAN, Variable("y"))),
@@ -454,7 +454,7 @@ class TestEvaluator(unittest.TestCase):
             self.assertEqual(output_lines, "true")
     
     def test_execute_mixed_boolean_and_integer_operations(self):
-        ast = [
+        ast: list[Statement] = [
             Let("a", Type.INTEGER, IntegerLiteral(15)),
             Let("b", Type.INTEGER, IntegerLiteral(10)),
             Let("sum", Type.INTEGER, BinaryExpression(Variable("a"), BinaryOperator.ADDITION, Variable("b"))),
@@ -471,7 +471,7 @@ class TestEvaluator(unittest.TestCase):
     
     # If statement tests
     def test_execute_if_true(self):
-        ast = [If(BooleanLiteral(True), [Print(IntegerLiteral(42))])]
+        ast: list[Statement] = [If(BooleanLiteral(True), [Print(IntegerLiteral(42))])]
         
         with self.capture_stdout() as captured_output:
             results = execute(ast)[0]
@@ -480,7 +480,7 @@ class TestEvaluator(unittest.TestCase):
             self.assertEqual(output_lines, "42")
     
     def test_execute_if_false(self):
-        ast = [If(BooleanLiteral(False), [Print(IntegerLiteral(42))])]
+        ast: list[Statement] = [If(BooleanLiteral(False), [Print(IntegerLiteral(42))])]
         
         with self.capture_stdout() as captured_output:
             results = execute(ast)[0]
@@ -489,7 +489,7 @@ class TestEvaluator(unittest.TestCase):
             self.assertEqual(output_lines, "")
     
     def test_execute_if_with_comparison(self):
-        ast = [
+        ast: list[Statement] = [
             Let("x", Type.INTEGER, IntegerLiteral(10)),
             If(BinaryExpression(Variable("x"), BinaryOperator.GREATER_THAN, IntegerLiteral(5)), [Print(Variable("x"))])
         ]
@@ -501,7 +501,7 @@ class TestEvaluator(unittest.TestCase):
             self.assertEqual(output_lines, "10")
     
     def test_execute_if_with_multiple_statements(self):
-        ast = [If(BooleanLiteral(True), [
+        ast: list[Statement] = [If(BooleanLiteral(True), [
             Let("x", Type.INTEGER, IntegerLiteral(5)),
             Let("y", Type.INTEGER, IntegerLiteral(10)),
             Print(BinaryExpression(Variable("x"), BinaryOperator.ADDITION, Variable("y")))
@@ -514,7 +514,7 @@ class TestEvaluator(unittest.TestCase):
             self.assertEqual(output_lines, "15")
     
     def test_execute_if_followed_by_regular_statement(self):
-        ast = [
+        ast: list[Statement] = [
             If(BooleanLiteral(True), [Print(IntegerLiteral(1))]),
             Print(IntegerLiteral(2))
         ]
@@ -527,7 +527,7 @@ class TestEvaluator(unittest.TestCase):
     
     def test_execute_if_variable_scoping(self):
         # Variables defined inside if should be available outside
-        ast = [
+        ast: list[Statement] = [
             If(BooleanLiteral(True), [Let("x", Type.INTEGER, IntegerLiteral(42))]),
             Print(Variable("x"))
         ]
@@ -540,7 +540,7 @@ class TestEvaluator(unittest.TestCase):
     
     def test_execute_if_false_no_variable_definition(self):
         # Variables not defined when if condition is false
-        ast = [
+        ast: list[Statement] = [
             If(BooleanLiteral(False), [Let("x", Type.INTEGER, IntegerLiteral(42))]),
             Print(Variable("x"))
         ]
@@ -552,7 +552,7 @@ class TestEvaluator(unittest.TestCase):
     # Variable modification tests
     def test_execute_set_statement(self):
         # Test basic variable modification
-        ast = [
+        ast: list[Statement] = [
             Let("x", Type.INTEGER, IntegerLiteral(5)),
             Set("x", IntegerLiteral(10)),
             Print(Variable("x"))
@@ -566,7 +566,7 @@ class TestEvaluator(unittest.TestCase):
     
     def test_execute_set_undefined_variable(self):
         # Test modifying undefined variable should fail
-        ast = [Set("undefined", IntegerLiteral(42))]
+        ast: list[Statement] = [Set("undefined", IntegerLiteral(42))]
         
         with self.assertRaises(EvaluationError) as cm:
             execute(ast)
@@ -574,7 +574,7 @@ class TestEvaluator(unittest.TestCase):
     
     def test_execute_set_with_expression(self):
         # Test setting variable with complex expression
-        ast = [
+        ast: list[Statement] = [
             Let("x", Type.INTEGER, IntegerLiteral(5)),
             Let("y", Type.INTEGER, IntegerLiteral(3)),
             Set("x", BinaryExpression(Variable("x"), BinaryOperator.ADDITION, Variable("y"))),
@@ -590,7 +590,7 @@ class TestEvaluator(unittest.TestCase):
     # While loop tests
     def test_execute_while_simple_countdown(self):
         # Test basic while loop counting down
-        ast = [
+        ast: list[Statement] = [
             Let("counter", Type.INTEGER, IntegerLiteral(3)),
             While(BinaryExpression(Variable("counter"), BinaryOperator.GREATER_THAN, IntegerLiteral(0)), [
                 Print(Variable("counter")),
@@ -606,7 +606,7 @@ class TestEvaluator(unittest.TestCase):
     
     def test_execute_while_false_condition(self):
         # Test while loop with false condition (should not execute body)
-        ast = [
+        ast: list[Statement] = [
             Let("x", Type.INTEGER, IntegerLiteral(5)),
             While(BooleanLiteral(False), [
                 Print(Variable("x")),
@@ -623,7 +623,7 @@ class TestEvaluator(unittest.TestCase):
     
     def test_execute_while_with_complex_condition(self):
         # Test while loop with complex condition
-        ast = [
+        ast: list[Statement] = [
             Let("sum", Type.INTEGER, IntegerLiteral(0)),
             Let("i", Type.INTEGER, IntegerLiteral(1)),
             While(BinaryExpression(Variable("i"), BinaryOperator.LESS_THAN_OR_EQUAL, IntegerLiteral(5)), [
@@ -689,7 +689,7 @@ class TestEvaluator(unittest.TestCase):
     
     def test_execute_while_nested_statements(self):
         # Test while loop with multiple statements in body
-        ast = [
+        ast: list[Statement] = [
             Let("x", Type.INTEGER, IntegerLiteral(2)),
             Let("result", Type.INTEGER, IntegerLiteral(1)),
             While(BinaryExpression(Variable("x"), BinaryOperator.GREATER_THAN, IntegerLiteral(0)), [
@@ -707,7 +707,7 @@ class TestEvaluator(unittest.TestCase):
     
     def test_execute_while_variable_scoping(self):
         # Test that variables modified in while loop are visible outside
-        ast = [
+        ast: list[Statement] = [
             Let("x", Type.INTEGER, IntegerLiteral(10)),
             While(BinaryExpression(Variable("x"), BinaryOperator.GREATER_THAN, IntegerLiteral(5)), [
                 Set("x", BinaryExpression(Variable("x"), BinaryOperator.SUBTRACTION, IntegerLiteral(2)))
@@ -723,7 +723,7 @@ class TestEvaluator(unittest.TestCase):
     
     def test_execute_while_followed_by_regular_statement(self):
         # Test while loop followed by regular statements
-        ast = [
+        ast: list[Statement] = [
             Let("i", Type.INTEGER, IntegerLiteral(1)),
             While(BinaryExpression(Variable("i"), BinaryOperator.LESS_THAN_OR_EQUAL, IntegerLiteral(2)), [
                 Print(Variable("i")),
@@ -740,7 +740,7 @@ class TestEvaluator(unittest.TestCase):
     
     def test_execute_while_boolean_condition_modification(self):
         # Test while loop that modifies boolean variables
-        ast = [
+        ast: list[Statement] = [
             Let("done", Type.BOOLEAN, BooleanLiteral(False)),
             Let("count", Type.INTEGER, IntegerLiteral(0)),
             While(BinaryExpression(Variable("done"), BinaryOperator.EQUAL_EQUAL, BooleanLiteral(False)), [
@@ -770,7 +770,7 @@ class TestEvaluator(unittest.TestCase):
         self.assertEqual(result, 3)
     
     def test_execute_modulus_statement(self):
-        ast = [
+        ast: list[Statement] = [
             Let("remainder", Type.INTEGER, BinaryExpression(IntegerLiteral(17), BinaryOperator.MODULUS, IntegerLiteral(5))),
             Print(Variable("remainder"))
         ]
@@ -798,6 +798,7 @@ class TestEvaluator(unittest.TestCase):
         env = Environment.empty()
         expr = BinaryExpression(FloatLiteral(5.5), BinaryOperator.SUBTRACTION, FloatLiteral(2.3))
         result = evaluate_expression(env, expr)
+        assert isinstance(result, float)
         self.assertAlmostEqual(result, 3.2, places=10)
     
     def test_evaluate_float_multiplication(self):
@@ -833,7 +834,7 @@ class TestEvaluator(unittest.TestCase):
         self.assertEqual(pi_value, 3.14)
     
     def test_execute_print_float(self):
-        ast = [Print(FloatLiteral(3.14))]
+        ast: list[Statement] = [Print(FloatLiteral(3.14))]
         
         with self.capture_stdout() as captured_output:
             results = execute(ast)[0]
@@ -842,7 +843,7 @@ class TestEvaluator(unittest.TestCase):
             self.assertEqual(output_lines, "3.14")
     
     def test_execute_complex_float_program(self):
-        ast = [
+        ast: list[Statement] = [
             Let("radius", Type.FLOAT, FloatLiteral(2.5)),
             Let("pi", Type.FLOAT, FloatLiteral(3.14159)),
             Let("area", Type.FLOAT, BinaryExpression(Variable("pi"), BinaryOperator.MULTIPLICATION, 
@@ -854,6 +855,7 @@ class TestEvaluator(unittest.TestCase):
             results = execute(ast)[0]
             expected_area = 3.14159 * 2.5 * 2.5
             self.assertEqual(len(results), 1)
+            assert isinstance(results[0], float)
             self.assertAlmostEqual(results[0], expected_area, places=5)
             output_lines = captured_output.getvalue().strip()
             self.assertAlmostEqual(float(output_lines), expected_area, places=5)
@@ -861,7 +863,7 @@ class TestEvaluator(unittest.TestCase):
     # Comment evaluation tests
     def test_execute_standalone_comment(self):
         """Test that standalone comments are skipped in evaluation."""
-        ast = [Comment()]
+        ast: list[Statement] = [Comment()]
         
         with self.capture_stdout() as captured_output:
             results = execute(ast)[0]
@@ -870,7 +872,7 @@ class TestEvaluator(unittest.TestCase):
     
     def test_execute_comment_with_statements(self):
         """Test that comments are skipped but other statements execute."""
-        ast = [
+        ast: list[Statement] = [
             Comment(),
             Let("x", Type.INTEGER, IntegerLiteral(42)),
             Comment(),
@@ -885,7 +887,7 @@ class TestEvaluator(unittest.TestCase):
     
     def test_execute_comment_only_program(self):
         """Test that a program with only comments produces no output."""
-        ast = [
+        ast: list[Statement] = [
             Comment(),
             Comment(),
             Comment()
@@ -898,7 +900,7 @@ class TestEvaluator(unittest.TestCase):
     
     def test_execute_comment_in_if_block(self):
         """Test that comments in if blocks are properly skipped."""
-        ast = [
+        ast: list[Statement] = [
             If(BooleanLiteral(True), [
                 Comment(),
                 Let("x", Type.INTEGER, IntegerLiteral(100)),
@@ -914,7 +916,7 @@ class TestEvaluator(unittest.TestCase):
     
     def test_execute_comment_in_while_block(self):
         """Test that comments in while blocks are properly skipped."""
-        ast = [
+        ast: list[Statement] = [
             Let("counter", Type.INTEGER, IntegerLiteral(3)),
             While(BinaryExpression(Variable("counter"), BinaryOperator.GREATER_THAN, IntegerLiteral(0)), [
                 Comment(),
@@ -932,7 +934,7 @@ class TestEvaluator(unittest.TestCase):
     
     def test_execute_complex_program_with_comments(self):
         """Test a complex program with comments throughout."""
-        ast = [
+        ast: list[Statement] = [
             Comment(),  # Program start comment
             Let("n", Type.INTEGER, IntegerLiteral(5)),
             Comment(),  # Variable comment
@@ -1363,7 +1365,7 @@ class TestEvaluator(unittest.TestCase):
     
     def test_execute_negative_integer_let(self):
         """Test executing let statement with negative integer."""
-        ast = [
+        ast: list[Statement] = [
             Let("x", Type.INTEGER, IntegerLiteral(-42)),
             Print(Variable("x"))
         ]
@@ -1375,7 +1377,7 @@ class TestEvaluator(unittest.TestCase):
     
     def test_execute_negative_float_let(self):
         """Test executing let statement with negative float."""
-        ast = [
+        ast: list[Statement] = [
             Let("pi", Type.FLOAT, FloatLiteral(-3.14)),
             Print(Variable("pi"))
         ]
@@ -1387,7 +1389,7 @@ class TestEvaluator(unittest.TestCase):
     
     def test_execute_negative_arithmetic(self):
         """Test executing arithmetic with negative numbers."""
-        ast = [
+        ast: list[Statement] = [
             Let("result", Type.INTEGER, BinaryExpression(IntegerLiteral(-5), BinaryOperator.ADDITION, IntegerLiteral(3))),
             Print(Variable("result"))
         ]
@@ -1399,7 +1401,7 @@ class TestEvaluator(unittest.TestCase):
     
     def test_execute_mixed_negative_positive_arithmetic(self):
         """Test executing arithmetic with both negative and positive numbers."""
-        ast = [
+        ast: list[Statement] = [
             Let("result", Type.INTEGER, BinaryExpression(
                 BinaryExpression(IntegerLiteral(-10), BinaryOperator.ADDITION, IntegerLiteral(5)),
                 BinaryOperator.SUBTRACTION, IntegerLiteral(2))),
@@ -1413,7 +1415,7 @@ class TestEvaluator(unittest.TestCase):
     
     def test_execute_negative_float_arithmetic(self):
         """Test executing arithmetic with negative floats."""
-        ast = [
+        ast: list[Statement] = [
             Let("result", Type.FLOAT, BinaryExpression(FloatLiteral(-2.5), BinaryOperator.MULTIPLICATION, FloatLiteral(4.0))),
             Print(Variable("result"))
         ]
@@ -1425,7 +1427,7 @@ class TestEvaluator(unittest.TestCase):
     
     def test_execute_negative_comparison(self):
         """Test executing comparison with negative numbers."""
-        ast = [
+        ast: list[Statement] = [
             Let("result", Type.BOOLEAN, BinaryExpression(IntegerLiteral(-5), BinaryOperator.LESS_THAN, IntegerLiteral(0))),
             Print(Variable("result"))
         ]

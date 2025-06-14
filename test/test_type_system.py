@@ -6,7 +6,7 @@ sys.path.insert(0, os.path.join(os.path.dirname(__file__)))
 
 import unittest
 
-from metric.tokenizer import tokenize, Token, IntegerToken, IdentifierToken
+from metric.tokenizer import TokenType, tokenize, Token, IntegerToken, IdentifierToken
 from metric.parser import parse, ParseError
 from metric.type_checker import type_check, TypeCheckError
 from metric.metric_ast import *
@@ -30,7 +30,7 @@ class TestTypeSystem(unittest.TestCase):
             type_check(ast)
         self.assertIn(expected_message, str(cm.exception))
     
-    def _compile_and_compare(self, code: str, expected_ast):
+    def _compile_and_compare(self, code: str, expected_ast: list[Let]):
         """Helper to compile code and compare AST."""
         tokens = tokenize(code)
         ast = parse(tokens)
@@ -398,21 +398,21 @@ class TestTypeSystem(unittest.TestCase):
     
     def test_parser_error_missing_type(self):
         """Test parser error when type annotation is missing."""
-        tokens = [Token.LET, IdentifierToken("x"), Token.EQUALS, IntegerToken(5)]
+        tokens: list[TokenType] = [Token.LET, IdentifierToken("x"), Token.EQUALS, IntegerToken(5)]
         with self.assertRaises(ParseError) as cm:
             parse(tokens)
         self.assertIn("Expected 'let identifier type = expression'", str(cm.exception))
     
     def test_parser_error_invalid_type(self):
         """Test parser error when invalid type is provided."""
-        tokens = [Token.LET, IdentifierToken("x"), IdentifierToken("string"), Token.EQUALS, IntegerToken(5)]
+        tokens: list[TokenType] = [Token.LET, IdentifierToken("x"), IdentifierToken("string"), Token.EQUALS, IntegerToken(5)]
         with self.assertRaises(ParseError) as cm:
             parse(tokens)
         self.assertIn("Expected type annotation (integer, boolean, or float)", str(cm.exception))
     
     def test_parser_error_missing_equals(self):
         """Test parser error when equals is missing after type."""
-        tokens = [Token.LET, IdentifierToken("x"), Token.INTEGER_TYPE, IntegerToken(5)]
+        tokens: list[TokenType] = [Token.LET, IdentifierToken("x"), Token.INTEGER_TYPE, IntegerToken(5)]
         with self.assertRaises(ParseError) as cm:
             parse(tokens)
         self.assertIn("Expected 'let identifier type = expression'", str(cm.exception))
