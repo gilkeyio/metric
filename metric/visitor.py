@@ -21,81 +21,81 @@ class ASTVisitor(ABC):
     
     @abstractmethod
     def visit_let(self, node: Let) -> Any:
-        pass
+        raise NotImplementedError
     
     @abstractmethod
     def visit_set(self, node: Set) -> Any:
-        pass
+        raise NotImplementedError
     
     @abstractmethod
     def visit_list_assignment(self, node: ListAssignment) -> Any:
-        pass
+        raise NotImplementedError
     
     @abstractmethod
     def visit_print(self, node: Print) -> Any:
-        pass
+        raise NotImplementedError
     
     @abstractmethod
     def visit_if(self, node: If) -> Any:
-        pass
+        raise NotImplementedError
     
     @abstractmethod
     def visit_while(self, node: While) -> Any:
-        pass
+        raise NotImplementedError
     
     @abstractmethod
     def visit_comment(self, node: Comment) -> Any:
-        pass
+        raise NotImplementedError
     
     @abstractmethod
     def visit_function_declaration(self, node: FunctionDeclaration) -> Any:
-        pass
+        raise NotImplementedError
     
     @abstractmethod
     def visit_return(self, node: Return) -> Any:
-        pass
+        raise NotImplementedError
     
     @abstractmethod
     def visit_binary_op(self, node: BinaryExpression) -> Any:
-        pass
+        raise NotImplementedError
     
     @abstractmethod
     def visit_unary_op(self, node: UnaryExpression) -> Any:
-        pass
+        raise NotImplementedError
     
     
     @abstractmethod
     def visit_integer_literal(self, node: IntegerLiteral) -> Any:
-        pass
+        raise NotImplementedError
     
     @abstractmethod
     def visit_float_literal(self, node: FloatLiteral) -> Any:
-        pass
+        raise NotImplementedError
     
     @abstractmethod
     def visit_boolean_literal(self, node: BooleanLiteral) -> Any:
-        pass
+        raise NotImplementedError
     
     @abstractmethod
     def visit_variable(self, node: Variable) -> Any:
-        pass
+        raise NotImplementedError
     
     @abstractmethod
     def visit_function_call(self, node: FunctionCall) -> Any:
-        pass
+        raise NotImplementedError
     
     @abstractmethod
     def visit_list_literal(self, node: ListLiteral) -> Any:
-        pass
+        raise NotImplementedError
     
     @abstractmethod
     def visit_list_access(self, node: ListAccess) -> Any:
-        pass
+        raise NotImplementedError
     
     @abstractmethod
     def visit_repeat_call(self, node: RepeatCall) -> Any:
-        pass
+        raise NotImplementedError
     
     @abstractmethod
     def visit_len_call(self, node: LenCall) -> Any:
-        pass
+        raise NotImplementedError
