@@ -1,0 +1,38 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "metric-lang"
+version = "0.1.0"
+description = "A simple statically-typed programming language for deterministic algorithm performance testing"
+authors = [{name = "Kimberly Gilkey", email = "kim@gilkey.io"}]
+readme = "README.md"
+requires-python = ">=3.13"
+keywords = ["programming-language", "interpreter", "static-typing", "performance-testing"]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Environment :: Console",
+    "Intended Audience :: Developers",
+    "Intended Audience :: Education",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.13",
+    "Topic :: Software Development :: Interpreters",
+    "Topic :: Software Development :: Compilers",
+    "Topic :: Education",
+]
+
+[project.scripts]
+metric = "metric.__main__:main"
+
+[project.urls]
+Homepage = "https://github.com/gilkeyio/metric"
+Repository = "https://github.com/gilkeyio/metric"
+Issues = "https://github.com/gilkeyio/metric/issues"
+
+
+[tool.mypy]
+python_version = "3.13"
+strict = true
+packages = ["metric"]
