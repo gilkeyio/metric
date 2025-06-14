@@ -74,6 +74,9 @@ class TokenizerError(Exception):
     pass
 
 
+TokenType = Union[Token, IntegerToken, FloatToken, IdentifierToken]
+
+
 class CharacterStream:
     """Iterator wrapper that tracks position and provides lookahead."""
     
@@ -117,10 +120,10 @@ def validate_identifier(identifier: str) -> None:
         if not char.isalpha():
             raise TokenizerError(f"Identifier contains invalid character: {identifier}")
 
-def tokenize(input_str: str) -> List[Union[Token, IntegerToken, FloatToken, IdentifierToken]]:
+def tokenize(input_str: str) -> List[TokenType]:
     """Tokenize input string into list of tokens with indentation handling."""
     lines = input_str.split('\n')
-    tokens = []
+    tokens: List[TokenType] = []
     indent_stack = [0]  # Stack to track indentation levels
     
     for line_num, line in enumerate(lines, 1):
@@ -170,7 +173,7 @@ def tokenize(input_str: str) -> List[Union[Token, IntegerToken, FloatToken, Iden
     
     return tokens
 
-def tokenize_line(line_content: str, line_num: int) -> List[Union[Token, IntegerToken, FloatToken, IdentifierToken]]:
+def tokenize_line(line_content: str, line_num: int) -> List[TokenType]:
     """Tokenize a single line of content."""
     if not line_content:
         return []
@@ -180,7 +183,7 @@ def tokenize_line(line_content: str, line_num: int) -> List[Union[Token, Integer
     if comment_pos != -1:
         # Tokenize the part before the comment (if any)
         code_part = line_content[:comment_pos].rstrip()
-        tokens = []
+        tokens: List[TokenType] = []
         if code_part:
             tokens = tokenize_line_without_comments(code_part, line_num)
         
@@ -191,12 +194,12 @@ def tokenize_line(line_content: str, line_num: int) -> List[Union[Token, Integer
     # No comments, tokenize normally
     return tokenize_line_without_comments(line_content, line_num)
 
-def tokenize_line_without_comments(line_content: str, line_num: int) -> List[Union[Token, IntegerToken, FloatToken, IdentifierToken]]:
+def tokenize_line_without_comments(line_content: str, line_num: int) -> List[TokenType]:
     """Tokenize a single line of content without comments."""
     if not line_content:
         return []
     
-    tokens = []
+    tokens: List[TokenType] = []
     i = 0
     
     while i < len(line_content):
