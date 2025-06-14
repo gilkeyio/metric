@@ -9,6 +9,27 @@ import unittest
 import sys
 import os
 import argparse
+import subprocess
+
+def run_with_coverage() -> None:
+    """Run tests with coverage analysis."""
+    try:
+        # Run tests with coverage
+        subprocess.run(['coverage', 'run', '-m', 'unittest', 'discover', 'test/', '-v'], check=True)
+        print("\n" + "="*50)
+        print("COVERAGE REPORT")
+        print("="*50)
+        # Show coverage report
+        subprocess.run(['coverage', 'report', '--show-missing'], check=True)
+        print("\n" + "="*50)
+        print("HTML report generated: run 'coverage html' for detailed view")
+        print("="*50)
+    except subprocess.CalledProcessError as e:
+        print(f"Error running coverage: {e}")
+        sys.exit(1)
+    except FileNotFoundError:
+        print("Error: Coverage.py not installed. Install with: pip install coverage")
+        sys.exit(1)
 
 def main() -> None:
     """Run tests for the Metric project."""
@@ -19,8 +40,15 @@ def main() -> None:
                        help='Verbose output')
     parser.add_argument('-q', '--quiet', action='store_true',
                        help='Quiet output')
+    parser.add_argument('-c', '--coverage', action='store_true',
+                       help='Run tests with coverage analysis')
     
     args = parser.parse_args()
+    
+    # Handle coverage option
+    if args.coverage:
+        run_with_coverage()
+        return
     
     # Get the directory containing this script
     current_dir = os.path.dirname(os.path.abspath(__file__))

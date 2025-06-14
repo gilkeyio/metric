@@ -15,7 +15,7 @@ from .metric_ast import *
 
 
 class EvaluationError(Exception):
-    """Run‑time error reported to the user program."""
+    """Run-time error reported to the user program."""
 
 
 RuntimeValue = int | bool | float | list[int | bool | float]
@@ -61,7 +61,7 @@ class Environment:
     def __init__(self, cost_ref: Optional[list[int]] = None):
         self._env: dict[str, RuntimeValue] = {}
         self._functions: dict[str, FunctionDeclaration] = {}
-        # use a one‑element list so that copies share the same counter object
+        # use a one-element list so that copies share the same counter object
         self._cost_ref: list[int] = cost_ref if cost_ref is not None else [0]
 
     # ---------------------------------------------------------------------
@@ -189,7 +189,7 @@ def evaluate_expression(env: Environment, expr: Expression) -> RuntimeValue:
             # binary op
             case BinaryExpression(left=left_expr, operator=operator, right=right_expr):
                 left = eval_expr(left_expr)
-                # short‑circuit for AND / OR: only eval right if needed
+                # short-circuit for AND / OR: only eval right if needed
                 match operator:
                     case BinaryOperator.AND:
                         if not left:
@@ -440,7 +440,7 @@ def execute_statement(env: Environment, stmt: Statement) -> tuple[Environment, O
         case Comment():
             return env, None
 
-        # function declaration – no cost (compile‑time)
+        # function declaration – no cost (compile-time)
         case FunctionDeclaration(name=name):
             if env.has_function(name):
                 raise EvaluationError(f"Function already declared: {name}")

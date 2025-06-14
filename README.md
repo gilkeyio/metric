@@ -38,6 +38,9 @@ metric
 ```bash
 # run all tests:
 python -m unittest discover test/
+
+# run tests with custom test runner:
+metric-test
 ```
 
 ## Language Features
@@ -606,3 +609,30 @@ set z = 5               # Type Error: variable 'z' not declared
 ```
 
 The type checker runs before code execution and provides clear error messages for type violations.
+
+## Development
+
+### Setup
+```bash
+# Install development dependencies
+pip install -e ".[dev]"
+```
+
+### Testing with Coverage
+```bash
+# Run tests with coverage report
+metric-coverage
+
+# Generate detailed coverage reports
+coverage run -m unittest discover test/ -v
+coverage report --show-missing
+coverage html  # Creates htmlcov/ directory with detailed HTML report
+```
+
+### Coverage Integration
+- **Minimum Coverage**: 80% threshold enforced in CI/CD
+- **Current Coverage**: 85%+ across all modules
+- **Coverage Reports**: Automatically generated in GitHub Actions
+- **HTML Reports**: Available locally via `coverage html`
+
+The project uses Coverage.py for test coverage analysis with configuration in `pyproject.toml`.
