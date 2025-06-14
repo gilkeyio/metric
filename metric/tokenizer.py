@@ -104,16 +104,6 @@ class CharacterStream:
         
         return char
     
-    def consume_while(self, predicate) -> str:
-        """Consume characters while predicate is true."""
-        start_pos = self.pos
-        while self.pos < len(self.text) and predicate(self.text[self.pos]):
-            self.next()
-        return self.text[start_pos:self.pos]
-    
-    def at_end(self) -> bool:
-        """Check if at end of input."""
-        return self.pos >= len(self.text)
 
 def validate_identifier(identifier: str) -> None:
     """Validate identifier follows language rules."""

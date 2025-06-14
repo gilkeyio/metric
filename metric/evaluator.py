@@ -9,7 +9,7 @@ Changes vs. previous version
 This keeps the language semantics intact while giving you a simple, portable cost model suitable for algorithmic comparison.
 """
 
-from typing import Dict, List, Optional, Tuple, Union
+from typing import Dict, List, Optional, Sequence, Tuple, Union
 from .metric_ast import *  # noqa: F403, F401 – import all AST node classes
 
 
@@ -385,7 +385,7 @@ def execute_statement(env: Environment, stmt: Statement) -> Tuple[Environment, O
 # Program entry point
 # ---------------------------------------------------------------------------
 
-def execute(ast: AbstractSyntaxTree) -> Tuple[List[RuntimeValue], int]:
+def execute(ast: AbstractSyntaxTree) -> Tuple[Sequence[RuntimeValue], int]:
     """Execute a whole programme and return (print_results, total_cost)."""
     env = Environment.empty()
     results: List[RuntimeValue] = []

@@ -110,7 +110,7 @@ class TestEvaluator(unittest.TestCase):
         stmt = Print(IntegerLiteral(123))
         
         with self.capture_stdout() as captured_output:
-            new_env, result = execute_statement(env, stmt)
+            _, result = execute_statement(env, stmt)
             self.assertEqual(result, 123)
             self.assertEqual(captured_output.getvalue().strip(), "123")
     
@@ -119,7 +119,7 @@ class TestEvaluator(unittest.TestCase):
         stmt = Print(Variable("value"))
         
         with self.capture_stdout() as captured_output:
-            new_env, result = execute_statement(env, stmt)
+            _, result = execute_statement(env, stmt)
             self.assertEqual(result, 99)
             self.assertEqual(captured_output.getvalue().strip(), "99")
     
