@@ -75,49 +75,6 @@ class TokenizerError(Exception):
 TokenType = Token | IntegerToken | FloatToken | IdentifierToken
 
 
-class CharacterStream:
-    """Iterator wrapper that tracks position and provides lookahead."""
-    
-    def __init__(self, text: str):
-        self.text = text
-        self.pos = 0
-        self.line = 1
-        self.column = 1
-    
-    def peek(self, offset: int = 0) -> str:
-        """Look ahead at character without consuming it."""
-        peek_pos = self.pos + offset
-        return self.text[peek_pos] if peek_pos < len(self.text) else ''
-    
-    def next(self) -> str:
-        """Consume and return next character."""
-        if self.pos >= len(self.text):
-            return ''
-        
-        char = self.text[self.pos]
-        self.pos += 1
-        
-        if char == '\n':
-            self.line += 1
-            self.column = 1
-        else:
-            self.column += 1
-        
-        return char
-    
-
-def validate_identifier(identifier: str) -> None:
-    """Validate identifier follows language rules."""
-    if len(identifier) == 0:
-        raise TokenizerError("Empty identifier")
-    
-    if not identifier[0].islower():
-        raise TokenizerError(f"Identifier must start with lowercase letter: {identifier}")
-    
-    for char in identifier[1:]:
-        if not char.isalpha():
-            raise TokenizerError(f"Identifier contains invalid character: {identifier}")
-
 def tokenize(input_str: str) -> list[TokenType]:
     """Tokenize input string into list of tokens with indentation handling."""
     lines = input_str.split('\n')
@@ -300,7 +257,6 @@ def tokenize_line_without_comments(line_content: str, line_num: int) -> list[Tok
             while i < len(line_content) and line_content[i].isalpha():
                 i += 1
             identifier = line_content[start:i]
-            validate_identifier(identifier)
             
             # Convert to appropriate token
             if identifier == "let":

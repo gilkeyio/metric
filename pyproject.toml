@@ -26,6 +26,7 @@ classifiers = [
 [project.scripts]
 metric = "metric.__main__:main"
 metric-test = "metric.test_runner:main"
+metric-coverage = "metric.test_runner:run_with_coverage"
 
 [project.urls]
 Homepage = "https://github.com/gilkeyio/metric"
@@ -36,9 +37,32 @@ Issues = "https://github.com/gilkeyio/metric/issues"
 [project.optional-dependencies]
 dev = [
     "mypy>=1.16.0",
+    "coverage>=7.0.0",
 ]
 
 [tool.mypy]
 python_version = "3.13"
 strict = true
 packages = ["metric", "test"]
+
+[tool.coverage.run]
+source = ["metric"]
+omit = [
+    "*/test/*",
+    "*/tests/*",
+    "*/venv/*",
+    "*/__pycache__/*"
+]
+
+[tool.coverage.report]
+exclude_lines = [
+    "pragma: no cover",
+    "def __repr__",
+    "raise AssertionError",
+    "raise NotImplementedError"
+]
+show_missing = true
+skip_covered = false
+
+[tool.coverage.html]
+directory = "htmlcov"
