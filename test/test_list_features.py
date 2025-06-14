@@ -4,20 +4,21 @@ import sys
 import os
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..'))
 
+from typing import Sequence
 import unittest
 from io import StringIO
 
 from metric.tokenizer import tokenize
 from metric.parser import parse, ParseError
 from metric.type_checker import type_check, TypeCheckError
-from metric.evaluator import execute, EvaluationError
+from metric.evaluator import RuntimeValue, execute, EvaluationError
 from test_utils import code_block
 
 
 class TestListFeatures(unittest.TestCase):
     """Comprehensive integration tests for list features."""
     
-    def _run_code(self, code: str):
+    def _run_code(self, code: str) -> tuple[Sequence[RuntimeValue], str]:
         """Helper to run code through full pipeline and capture output."""
         tokens = tokenize(code)
         ast = parse(tokens)
@@ -34,7 +35,7 @@ class TestListFeatures(unittest.TestCase):
         finally:
             sys.stdout = old_stdout
     
-    def _expect_error(self, code: str, error_type: type[Exception], error_keyword: str):
+    def _expect_error(self, code: str, error_type: type[Exception], error_keyword: str) -> None:
         """Helper to expect a specific error."""
         try:
             self._run_code(code)
@@ -42,7 +43,7 @@ class TestListFeatures(unittest.TestCase):
         except error_type as e:
             self.assertIn(error_keyword.lower(), str(e).lower())
     
-    def test_list_basic_operations(self):
+    def test_list_basic_operations(self) -> None:
         """Test basic list operations work together."""
         code = code_block("""
             let nums list of integer = [1, 2, 3, 4, 5]
@@ -60,7 +61,7 @@ class TestListFeatures(unittest.TestCase):
         self.assertEqual(output, expected_output)
         self.assertEqual(_, [1, 2, 3, 4, 5, 5, 1, 5, 1, 2, 99, 4, 5, 99])
     
-    def test_list_with_repeat_function(self):
+    def test_list_with_repeat_function(self) -> None:
         """Test repeat function creates correct lists."""
         code = code_block("""
             let zeros list of integer = repeat(0, 4)
@@ -76,7 +77,7 @@ class TestListFeatures(unittest.TestCase):
         expected_output = "[0, 0, 0, 0]\n4\n[true, true, true]\n[0, 42, 0, 0]"
         self.assertEqual(output, expected_output)
     
-    def test_list_with_expressions(self):
+    def test_list_with_expressions(self) -> None:
         """Test lists containing expressions."""
         code = code_block("""
             let x integer = 10
@@ -91,7 +92,7 @@ class TestListFeatures(unittest.TestCase):
         expected_output = "[11, 40, 30]\n[200, 40, 30]"
         self.assertEqual(output, expected_output)
     
-    def test_list_in_loops(self):
+    def test_list_in_loops(self) -> None:
         """Test lists work correctly in loops."""
         code = code_block("""
             let nums list of integer = [1, 2, 3]
@@ -107,7 +108,7 @@ class TestListFeatures(unittest.TestCase):
         expected_output = "1\n2\n3\n[2, 4, 6]"
         self.assertEqual(output, expected_output)
     
-    def test_list_in_conditionals(self):
+    def test_list_in_conditionals(self) -> None:
         """Test lists work correctly in if statements."""
         code = code_block("""
             let nums list of integer = [5, 10, 15]
@@ -123,7 +124,7 @@ class TestListFeatures(unittest.TestCase):
         expected_output = "5\n100\n[5, 100, 15]"
         self.assertEqual(output, expected_output)
     
-    def test_list_with_functions(self):
+    def test_list_with_functions(self) -> None:
         """Test lists work correctly with functions."""
         code = code_block("""
             def sumlist(nums list of integer) returns integer
@@ -150,7 +151,7 @@ class TestListFeatures(unittest.TestCase):
         expected_output = "15\n[42, 42, 42]\n126"
         self.assertEqual(output, expected_output)
     
-    def test_list_complex_access_patterns(self):
+    def test_list_complex_access_patterns(self) -> None:
         """Test complex list access patterns."""
         code = code_block("""
             let data list of integer = [10, 20, 30, 40, 50]
@@ -168,7 +169,7 @@ class TestListFeatures(unittest.TestCase):
         expected_output = "10\n30\n50\n[10, 20, 999, 40, 50]"
         self.assertEqual(output, expected_output)
     
-    def test_list_boolean_operations(self):
+    def test_list_boolean_operations(self) -> None:
         """Test lists with boolean elements."""
         code = code_block("""
             let flags list of boolean = [true, false, true, false]
@@ -186,7 +187,7 @@ class TestListFeatures(unittest.TestCase):
         expected_output = "[true, false, true, false]\n4\ntrue\nfalse\n[true, true, true, false]\n[false, false]"
         self.assertEqual(output, expected_output)
     
-    def test_list_empty_operations(self):
+    def test_list_empty_operations(self) -> None:
         """Test operations on empty lists."""
         code = code_block("""
             let empty list of integer = repeat(0, 0)
@@ -201,7 +202,7 @@ class TestListFeatures(unittest.TestCase):
         expected_output = "[]\n0\n[]\n0"
         self.assertEqual(output, expected_output)
     
-    def test_list_function_parameters_and_returns(self):
+    def test_list_function_parameters_and_returns(self) -> None:
         """Test lists as function parameters and return values."""
         code = code_block("""
             def reverse(nums list of integer) returns list of integer
@@ -227,7 +228,7 @@ class TestListFeatures(unittest.TestCase):
         self.assertEqual(output, expected_output)
     
     # Error handling tests
-    def test_list_type_errors(self):
+    def test_list_type_errors(self) -> None:
         """Test list type checking errors."""
         error_cases = [
             ("let mixed list of integer = [1, true]", TypeCheckError, "homogeneous"),
@@ -241,7 +242,7 @@ class TestListFeatures(unittest.TestCase):
             with self.subTest(code=code):
                 self._expect_error(code, error_type, keyword)
     
-    def test_list_runtime_errors(self):
+    def test_list_runtime_errors(self) -> None:
         """Test list runtime errors."""
         error_cases = [
             ("let nums list of integer = [1, 2, 3]\nprint nums[5]", EvaluationError, "out of bounds"),
@@ -254,7 +255,7 @@ class TestListFeatures(unittest.TestCase):
             with self.subTest(code=code):
                 self._expect_error(code, error_type, keyword)
     
-    def test_list_parser_errors(self):
+    def test_list_parser_errors(self) -> None:
         """Test list parsing errors."""
         error_cases = [
             ("let nums list integer = [1, 2, 3]", ParseError, "of"),
@@ -268,7 +269,7 @@ class TestListFeatures(unittest.TestCase):
             with self.subTest(code=code):
                 self._expect_error(code, error_type, keyword)
     
-    def test_list_comprehensive_program(self):
+    def test_list_comprehensive_program(self) -> None:
         """Test a comprehensive program using all list features."""
         code = code_block("""
             def findmax(nums list of integer) returns integer
