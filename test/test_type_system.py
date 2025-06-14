@@ -1,28 +1,24 @@
 #!/usr/bin/env python3
 
-import sys
-import os
-sys.path.insert(0, os.path.join(os.path.dirname(__file__)))
-
 import unittest
 
-from metric.tokenizer import tokenize, Token, IntegerToken, IdentifierToken
+from metric.tokenizer import TokenType, tokenize, Token, IntegerToken, IdentifierToken
 from metric.parser import parse, ParseError
 from metric.type_checker import type_check, TypeCheckError
 from metric.metric_ast import *
-from test_utils import code_block
+from test.test_utils import code_block
 
 
 class TestTypeSystem(unittest.TestCase):
     
-    def _compile_and_check(self, code: str):
+    def _compile_and_check(self, code: str) -> AbstractSyntaxTree:
         """Helper to compile code and run type checking."""
         tokens = tokenize(code)
         ast = parse(tokens)
         type_check(ast)
         return ast
     
-    def _expect_type_error(self, code: str, expected_message: str):
+    def _expect_type_error(self, code: str, expected_message: str) -> None:
         """Helper to expect a type error with specific message."""
         tokens = tokenize(code)
         ast = parse(tokens)
@@ -30,38 +26,38 @@ class TestTypeSystem(unittest.TestCase):
             type_check(ast)
         self.assertIn(expected_message, str(cm.exception))
     
-    def _compile_and_compare(self, code: str, expected_ast):
+    def _compile_and_compare(self, code: str, expected_ast: list[Let]) -> AbstractSyntaxTree:
         """Helper to compile code and compare AST."""
         tokens = tokenize(code)
         ast = parse(tokens)
         self.assertEqual(ast, expected_ast)
         return ast
     
-    def test_valid_integer_declaration(self):
+    def test_valid_integer_declaration(self)  -> None:
         """Test valid integer variable declaration."""
         code = "let x integer = 5"
         expected = [Let("x", Type.INTEGER, IntegerLiteral(5))]
         ast = self._compile_and_compare(code, expected)
         type_check(ast)
     
-    def test_valid_boolean_declaration(self):
+    def test_valid_boolean_declaration(self)  -> None:
         """Test valid boolean variable declaration."""
         code = "let flag boolean = true"
         expected = [Let("flag", Type.BOOLEAN, BooleanLiteral(True))]
         ast = self._compile_and_compare(code, expected)
         type_check(ast)
     
-    def test_type_mismatch_integer_boolean(self):
+    def test_type_mismatch_integer_boolean(self)  -> None:
         """Test type mismatch: integer variable assigned boolean value."""
         code = "let x integer = true"
         self._expect_type_error(code, "boolean to variable 'x' of type integer")
     
-    def test_type_mismatch_boolean_integer(self):
+    def test_type_mismatch_boolean_integer(self)  -> None:
         """Test type mismatch: boolean variable assigned integer value."""
         code = "let flag boolean = 42"
         self._expect_type_error(code, "integer to variable 'flag' of type boolean")
     
-    def test_variable_redeclaration_error(self):
+    def test_variable_redeclaration_error(self)  -> None:
         """Test error when variable is declared twice."""
         code = code_block("""
             let x integer = 5
@@ -73,7 +69,7 @@ class TestTypeSystem(unittest.TestCase):
             type_check(ast)
         self.assertIn("Variable 'x' is already declared", str(cm.exception))
     
-    def test_set_statement_type_check(self):
+    def test_set_statement_type_check(self)  -> None:
         """Test set statement with correct type."""
         code = code_block("""
             let x integer = 5
@@ -81,7 +77,7 @@ class TestTypeSystem(unittest.TestCase):
         """)
         self._compile_and_check(code)
     
-    def test_set_statement_type_mismatch(self):
+    def test_set_statement_type_mismatch(self)  -> None:
         """Test set statement with incorrect type."""
         code = code_block("""
             let x integer = 5
@@ -94,7 +90,7 @@ class TestTypeSystem(unittest.TestCase):
         self.assertIn("Type mismatch", str(cm.exception))
         self.assertIn("boolean to variable 'x' of type integer", str(cm.exception))
     
-    def test_set_undeclared_variable(self):
+    def test_set_undeclared_variable(self)  -> None:
         """Test set statement on undeclared variable."""
         code = "set x = 5"
         tokens = tokenize(code)
@@ -103,7 +99,7 @@ class TestTypeSystem(unittest.TestCase):
             type_check(ast)
         self.assertIn("Variable 'x' is not declared", str(cm.exception))
     
-    def test_arithmetic_expressions_type_check(self):
+    def test_arithmetic_expressions_type_check(self)  -> None:
         """Test arithmetic expressions with correct types."""
         code = code_block("""
             let x integer = 5
@@ -115,7 +111,7 @@ class TestTypeSystem(unittest.TestCase):
         # Should type check without error
         type_check(ast)
     
-    def test_comparison_expressions_type_check(self):
+    def test_comparison_expressions_type_check(self)  -> None:
         """Test comparison expressions producing boolean."""
         code = code_block("""
             let x integer = 5
@@ -127,7 +123,7 @@ class TestTypeSystem(unittest.TestCase):
         # Should type check without error
         type_check(ast)
     
-    def test_logical_and_type_check(self):
+    def test_logical_and_type_check(self)  -> None:
         """Test logical and expressions with boolean operands."""
         code = code_block("""
             let x boolean = true
@@ -136,7 +132,7 @@ class TestTypeSystem(unittest.TestCase):
         """)
         self._compile_and_check(code)
     
-    def test_logical_or_type_check(self):
+    def test_logical_or_type_check(self)  -> None:
         """Test logical or expressions with boolean operands."""
         code = code_block("""
             let x boolean = true
@@ -145,21 +141,21 @@ class TestTypeSystem(unittest.TestCase):
         """)
         self._compile_and_check(code)
     
-    def test_logical_and_with_literals(self):
+    def test_logical_and_with_literals(self)  -> None:
         """Test logical and with boolean literals."""
         code = code_block("""
             let result boolean = true and false
         """)
         self._compile_and_check(code)
     
-    def test_logical_or_with_literals(self):
+    def test_logical_or_with_literals(self)  -> None:
         """Test logical or with boolean literals."""
         code = code_block("""
             let result boolean = true or false
         """)
         self._compile_and_check(code)
     
-    def test_complex_logical_expression_type_check(self):
+    def test_complex_logical_expression_type_check(self)  -> None:
         """Test complex logical expressions."""
         code = code_block("""
             let a boolean = true
@@ -169,7 +165,7 @@ class TestTypeSystem(unittest.TestCase):
         """)
         self._compile_and_check(code)
     
-    def test_logical_and_type_error_integer_operand(self):
+    def test_logical_and_type_error_integer_operand(self)  -> None:
         """Test logical and with integer operand."""
         code = code_block("""
             let x boolean = true
@@ -178,7 +174,7 @@ class TestTypeSystem(unittest.TestCase):
         """)
         self._expect_type_error(code, "Operator And requires boolean operands")
     
-    def test_logical_or_type_error_integer_operand(self):
+    def test_logical_or_type_error_integer_operand(self)  -> None:
         """Test logical or with integer operand."""
         code = code_block("""
             let x boolean = true
@@ -187,7 +183,7 @@ class TestTypeSystem(unittest.TestCase):
         """)
         self._expect_type_error(code, "Operator Or requires boolean operands")
     
-    def test_logical_and_type_error_float_operand(self):
+    def test_logical_and_type_error_float_operand(self)  -> None:
         """Test logical and with float operand."""
         code = code_block("""
             let x boolean = true
@@ -196,7 +192,7 @@ class TestTypeSystem(unittest.TestCase):
         """)
         self._expect_type_error(code, "Operator And requires boolean operands")
     
-    def test_logical_or_type_error_float_operand(self):
+    def test_logical_or_type_error_float_operand(self)  -> None:
         """Test logical or with float operand."""
         code = code_block("""
             let x boolean = true
@@ -205,7 +201,7 @@ class TestTypeSystem(unittest.TestCase):
         """)
         self._expect_type_error(code, "Operator Or requires boolean operands")
     
-    def test_logical_and_type_error_both_non_boolean(self):
+    def test_logical_and_type_error_both_non_boolean(self)  -> None:
         """Test logical and with both operands non-boolean."""
         code = code_block("""
             let x integer = 5
@@ -214,7 +210,7 @@ class TestTypeSystem(unittest.TestCase):
         """)
         self._expect_type_error(code, "Operator And requires boolean operands")
     
-    def test_logical_or_type_error_both_non_boolean(self):
+    def test_logical_or_type_error_both_non_boolean(self)  -> None:
         """Test logical or with both operands non-boolean."""
         code = code_block("""
             let x integer = 5
@@ -223,7 +219,7 @@ class TestTypeSystem(unittest.TestCase):
         """)
         self._expect_type_error(code, "Operator Or requires boolean operands")
     
-    def test_mixed_comparison_and_logical_type_check(self):
+    def test_mixed_comparison_and_logical_type_check(self)  -> None:
         """Test mixed comparison and logical operations."""
         code = code_block("""
             let x integer = 5
@@ -233,7 +229,7 @@ class TestTypeSystem(unittest.TestCase):
         """)
         self._compile_and_check(code)
     
-    def test_logical_not_type_check(self):
+    def test_logical_not_type_check(self)  -> None:
         """Test logical not with boolean operand."""
         code = code_block("""
             let x boolean = true
@@ -241,14 +237,14 @@ class TestTypeSystem(unittest.TestCase):
         """)
         self._compile_and_check(code)
     
-    def test_logical_not_with_boolean_literal(self):
+    def test_logical_not_with_boolean_literal(self)  -> None:
         """Test logical not with boolean literal."""
         code = code_block("""
             let result boolean = not true
         """)
         self._compile_and_check(code)
     
-    def test_logical_not_with_expression(self):
+    def test_logical_not_with_expression(self)  -> None:
         """Test logical not with complex boolean expression."""
         code = code_block("""
             let x boolean = true
@@ -257,7 +253,7 @@ class TestTypeSystem(unittest.TestCase):
         """)
         self._compile_and_check(code)
     
-    def test_logical_not_type_error_integer_operand(self):
+    def test_logical_not_type_error_integer_operand(self)  -> None:
         """Test type error when using not with integer operand."""
         code = code_block("""
             let x integer = 5
@@ -265,7 +261,7 @@ class TestTypeSystem(unittest.TestCase):
         """)
         self._expect_type_error(code, "Operator 'not' requires boolean operand")
     
-    def test_logical_not_type_error_float_operand(self):
+    def test_logical_not_type_error_float_operand(self)  -> None:
         """Test type error when using not with float operand."""
         code = code_block("""
             let x float = 5.0
@@ -273,7 +269,7 @@ class TestTypeSystem(unittest.TestCase):
         """)
         self._expect_type_error(code, "Operator 'not' requires boolean operand")
     
-    def test_double_logical_not_type_check(self):
+    def test_double_logical_not_type_check(self)  -> None:
         """Test double logical not."""
         code = code_block("""
             let x boolean = true
@@ -281,7 +277,7 @@ class TestTypeSystem(unittest.TestCase):
         """)
         self._compile_and_check(code)
     
-    def test_logical_not_precedence_with_and(self):
+    def test_logical_not_precedence_with_and(self)  -> None:
         """Test logical not precedence with and operator."""
         code = code_block("""
             let x boolean = true
@@ -290,7 +286,7 @@ class TestTypeSystem(unittest.TestCase):
         """)
         self._compile_and_check(code)
     
-    def test_logical_not_precedence_with_or(self):
+    def test_logical_not_precedence_with_or(self)  -> None:
         """Test logical not precedence with or operator."""
         code = code_block("""
             let x boolean = false
@@ -299,7 +295,7 @@ class TestTypeSystem(unittest.TestCase):
         """)
         self._compile_and_check(code)
     
-    def test_logical_not_precedence_with_comparison(self):
+    def test_logical_not_precedence_with_comparison(self)  -> None:
         """Test logical not with comparison operators."""
         code = code_block("""
             let x integer = 10
@@ -307,7 +303,7 @@ class TestTypeSystem(unittest.TestCase):
         """)
         self._compile_and_check(code)
     
-    def test_complex_logical_not_precedence(self):
+    def test_complex_logical_not_precedence(self)  -> None:
         """Test complex expression with not precedence."""
         code = code_block("""
             let x boolean = true
@@ -317,7 +313,7 @@ class TestTypeSystem(unittest.TestCase):
         """)
         self._compile_and_check(code)
     
-    def test_if_condition_type_check(self):
+    def test_if_condition_type_check(self)  -> None:
         """Test if statement with boolean condition."""
         code = code_block("""
             let flag boolean = true
@@ -329,7 +325,7 @@ class TestTypeSystem(unittest.TestCase):
         # Should type check without error
         type_check(ast)
     
-    def test_if_condition_type_error(self):
+    def test_if_condition_type_error(self)  -> None:
         """Test if statement with non-boolean condition."""
         code = code_block("""
             let x integer = 5
@@ -342,7 +338,7 @@ class TestTypeSystem(unittest.TestCase):
             type_check(ast)
         self.assertIn("If condition must be boolean", str(cm.exception))
     
-    def test_while_condition_type_check(self):
+    def test_while_condition_type_check(self)  -> None:
         """Test while statement with boolean condition."""
         code = code_block("""
             let flag boolean = true
@@ -354,7 +350,7 @@ class TestTypeSystem(unittest.TestCase):
         # Should type check without error
         type_check(ast)
     
-    def test_while_condition_type_error(self):
+    def test_while_condition_type_error(self)  -> None:
         """Test while statement with non-boolean condition."""
         code = code_block("""
             let x integer = 5
@@ -367,7 +363,7 @@ class TestTypeSystem(unittest.TestCase):
             type_check(ast)
         self.assertIn("While condition must be boolean", str(cm.exception))
     
-    def test_undeclared_variable_usage(self):
+    def test_undeclared_variable_usage(self)  -> None:
         """Test using undeclared variable in expression."""
         code = "print x"
         tokens = tokenize(code)
@@ -376,7 +372,7 @@ class TestTypeSystem(unittest.TestCase):
             type_check(ast)
         self.assertIn("Variable 'x' is not declared", str(cm.exception))
     
-    def test_complex_valid_program(self):
+    def test_complex_valid_program(self)  -> None:
         """Test complex but valid typed program."""
         code = code_block("""
             let x integer = 10
@@ -396,35 +392,35 @@ class TestTypeSystem(unittest.TestCase):
         # Should type check without error
         type_check(ast)
     
-    def test_parser_error_missing_type(self):
+    def test_parser_error_missing_type(self)  -> None:
         """Test parser error when type annotation is missing."""
-        tokens = [Token.LET, IdentifierToken("x"), Token.EQUALS, IntegerToken(5)]
+        tokens: list[TokenType] = [Token.LET, IdentifierToken("x"), Token.EQUALS, IntegerToken(5)]
         with self.assertRaises(ParseError) as cm:
             parse(tokens)
         self.assertIn("Expected 'let identifier type = expression'", str(cm.exception))
     
-    def test_parser_error_invalid_type(self):
+    def test_parser_error_invalid_type(self)  -> None:
         """Test parser error when invalid type is provided."""
-        tokens = [Token.LET, IdentifierToken("x"), IdentifierToken("string"), Token.EQUALS, IntegerToken(5)]
+        tokens: list[TokenType] = [Token.LET, IdentifierToken("x"), IdentifierToken("string"), Token.EQUALS, IntegerToken(5)]
         with self.assertRaises(ParseError) as cm:
             parse(tokens)
         self.assertIn("Expected type annotation (integer, boolean, or float)", str(cm.exception))
     
-    def test_parser_error_missing_equals(self):
+    def test_parser_error_missing_equals(self)  -> None:
         """Test parser error when equals is missing after type."""
-        tokens = [Token.LET, IdentifierToken("x"), Token.INTEGER_TYPE, IntegerToken(5)]
+        tokens: list[TokenType] = [Token.LET, IdentifierToken("x"), Token.INTEGER_TYPE, IntegerToken(5)]
         with self.assertRaises(ParseError) as cm:
             parse(tokens)
         self.assertIn("Expected 'let identifier type = expression'", str(cm.exception))
     
-    def test_modulus_operation_type_check(self):
+    def test_modulus_operation_type_check(self)  -> None:
         """Test modulus operation type checking."""
         code = code_block("""
             let remainder integer = 10 % 3
         """)
         self._compile_and_check(code)
     
-    def test_modulus_type_mismatch(self):
+    def test_modulus_type_mismatch(self)  -> None:
         """Test modulus with non-integer operands."""
         code = code_block("""
             let x integer = 5
@@ -434,14 +430,14 @@ class TestTypeSystem(unittest.TestCase):
         self._expect_type_error(code, "Operator Modulus requires integer operands")
     
     # Float type system tests
-    def test_valid_float_declaration(self):
+    def test_valid_float_declaration(self)  -> None:
         """Test valid float variable declaration."""
         code = "let pi float = 3.14"
         expected = [Let("pi", Type.FLOAT, FloatLiteral(3.14))]
         ast = self._compile_and_compare(code, expected)
         type_check(ast)
     
-    def test_float_arithmetic_type_check(self):
+    def test_float_arithmetic_type_check(self)  -> None:
         """Test float arithmetic expressions."""
         code = code_block("""
             let x float = 2.5
@@ -450,7 +446,7 @@ class TestTypeSystem(unittest.TestCase):
         """)
         self._compile_and_check(code)
     
-    def test_mixed_arithmetic_type_check(self):
+    def test_mixed_arithmetic_type_check(self)  -> None:
         """Test mixed integer/float arithmetic."""
         code = code_block("""
             let x integer = 5
@@ -459,7 +455,7 @@ class TestTypeSystem(unittest.TestCase):
         """)
         self._compile_and_check(code)
     
-    def test_float_comparison_type_check(self):
+    def test_float_comparison_type_check(self)  -> None:
         """Test float comparison expressions."""
         code = code_block("""
             let x float = 3.14
@@ -468,22 +464,22 @@ class TestTypeSystem(unittest.TestCase):
         """)
         self._compile_and_check(code)
     
-    def test_type_mismatch_float_integer(self):
+    def test_type_mismatch_float_integer(self)  -> None:
         """Test type mismatch: float variable assigned integer value."""
         code = "let x float = 42"
         self._expect_type_error(code, "integer to variable 'x' of type float")
     
-    def test_type_mismatch_integer_float(self):
+    def test_type_mismatch_integer_float(self)  -> None:
         """Test type mismatch: integer variable assigned float value."""
         code = "let x integer = 3.14"
         self._expect_type_error(code, "float to variable 'x' of type integer")
     
-    def test_type_mismatch_boolean_float(self):
+    def test_type_mismatch_boolean_float(self)  -> None:
         """Test type mismatch: boolean variable assigned float value."""
         code = "let flag boolean = 3.14"
         self._expect_type_error(code, "float to variable 'flag' of type boolean")
     
-    def test_float_set_statement_type_check(self):
+    def test_float_set_statement_type_check(self)  -> None:
         """Test set statement with float type."""
         code = code_block("""
             let pi float = 3.0
@@ -491,7 +487,7 @@ class TestTypeSystem(unittest.TestCase):
         """)
         self._compile_and_check(code)
     
-    def test_float_set_statement_type_mismatch(self):
+    def test_float_set_statement_type_mismatch(self)  -> None:
         """Test set statement with incorrect float type."""
         code = code_block("""
             let pi float = 3.14
@@ -499,7 +495,7 @@ class TestTypeSystem(unittest.TestCase):
         """)
         self._expect_type_error(code, "integer to variable 'pi' of type float")
     
-    def test_float_division_result_type(self):
+    def test_float_division_result_type(self)  -> None:
         """Test that division with floats returns float type."""
         code = code_block("""
             let x float = 7.5
@@ -508,7 +504,7 @@ class TestTypeSystem(unittest.TestCase):
         """)
         self._compile_and_check(code)
     
-    def test_mixed_division_type_promotion(self):
+    def test_mixed_division_type_promotion(self)  -> None:
         """Test mixed integer/float division type promotion."""
         code = code_block("""
             let x integer = 7
@@ -518,7 +514,7 @@ class TestTypeSystem(unittest.TestCase):
         self._compile_and_check(code)
     
     # Function type checking tests
-    def test_simple_function_declaration(self):
+    def test_simple_function_declaration(self)  -> None:
         """Test that a simple function declaration type checks correctly."""
         code = code_block("""
             def add(x integer, y integer) returns integer
@@ -527,7 +523,7 @@ class TestTypeSystem(unittest.TestCase):
         # Should not raise any errors
         self._compile_and_check(code)
     
-    def test_function_call_type_check(self):
+    def test_function_call_type_check(self)  -> None:
         """Test that function calls are type checked correctly."""
         code = code_block("""
             def add(x integer, y integer) returns integer
@@ -537,7 +533,7 @@ class TestTypeSystem(unittest.TestCase):
         # Should not raise any errors
         self._compile_and_check(code)
     
-    def test_function_call_wrong_argument_count(self):
+    def test_function_call_wrong_argument_count(self)  -> None:
         """Test that function calls with wrong argument count cause error."""
         code = code_block("""
             def add(x integer, y integer) returns integer
@@ -546,7 +542,7 @@ class TestTypeSystem(unittest.TestCase):
         """)
         self._expect_type_error(code, "Function 'add' expects 2 arguments, got 1")
     
-    def test_function_call_wrong_argument_type(self):
+    def test_function_call_wrong_argument_type(self)  -> None:
         """Test that function calls with wrong argument types cause error."""
         code = code_block("""
             def add(x integer, y integer) returns integer
@@ -555,7 +551,7 @@ class TestTypeSystem(unittest.TestCase):
         """)
         self._expect_type_error(code, "Argument 2 to function 'add': expected integer, got boolean")
     
-    def test_function_missing_return_statement(self):
+    def test_function_missing_return_statement(self)  -> None:
         """Test that functions without return statements cause error."""
         code = code_block("""
             def add(x integer, y integer) returns integer
@@ -563,7 +559,7 @@ class TestTypeSystem(unittest.TestCase):
         """)
         self._expect_type_error(code, "Function 'add' must have a return statement")
     
-    def test_function_return_type_mismatch(self):
+    def test_function_return_type_mismatch(self)  -> None:
         """Test that return type mismatches cause error."""
         code = code_block("""
             def add(x integer, y integer) returns integer
@@ -571,7 +567,7 @@ class TestTypeSystem(unittest.TestCase):
         """)
         self._expect_type_error(code, "Return type mismatch: expected integer, got boolean")
     
-    def test_function_redeclaration_error(self):
+    def test_function_redeclaration_error(self)  -> None:
         """Test that redeclaring a function causes error."""
         code = code_block("""
             def add(x integer, y integer) returns integer
@@ -581,83 +577,83 @@ class TestTypeSystem(unittest.TestCase):
         """)
         self._expect_type_error(code, "Function 'add' is already declared")
     
-    def test_return_outside_function_error(self):
+    def test_return_outside_function_error(self)  -> None:
         """Test that return statements outside functions cause error."""
         code = "return 5"
         self._expect_type_error(code, "Return statement must be inside a function")
     
     # Comprehensive List Type System Tests
-    def test_valid_list_declaration_integer(self):
+    def test_valid_list_declaration_integer(self)  -> None:
         """Test valid list declaration with integer elements."""
         code = "let nums list of integer = [1, 2, 3]"
         self._compile_and_check(code)
     
-    def test_valid_list_declaration_boolean(self):
+    def test_valid_list_declaration_boolean(self)  -> None:
         """Test valid list declaration with boolean elements."""
         code = "let flags list of boolean = [true, false, true]"
         self._compile_and_check(code)
     
-    def test_valid_list_declaration_float(self):
+    def test_valid_list_declaration_float(self)  -> None:
         """Test valid list declaration with float elements."""
         code = "let values list of float = [1.5, 2.0, 3.14]"
         self._compile_and_check(code)
     
-    def test_valid_empty_list_declaration(self):
+    def test_valid_empty_list_declaration(self)  -> None:
         """Test valid empty list declaration."""
         code = "let empty list of integer = repeat(0, 0)"
         self._compile_and_check(code)
     
-    def test_list_homogeneity_type_error_integer_boolean(self):
+    def test_list_homogeneity_type_error_integer_boolean(self)  -> None:
         """Test list homogeneity error: mixing integers and booleans."""
         code = "let mixed list of integer = [1, true, 3]"
         self._expect_type_error(code, "List elements must be homogeneous")
     
-    def test_list_homogeneity_type_error_float_integer(self):
+    def test_list_homogeneity_type_error_float_integer(self)  -> None:
         """Test list homogeneity error: mixing floats and integers."""
         code = "let mixed list of float = [1.5, 42, 3.14]"
         self._expect_type_error(code, "List elements must be homogeneous")
     
-    def test_list_homogeneity_type_error_boolean_integer(self):
+    def test_list_homogeneity_type_error_boolean_integer(self)  -> None:
         """Test list homogeneity error: mixing booleans and integers."""
         code = "let mixed list of boolean = [true, 5, false]"
         self._expect_type_error(code, "List elements must be homogeneous")
     
-    def test_list_type_annotation_mismatch_integer(self):
+    def test_list_type_annotation_mismatch_integer(self)  -> None:
         """Test list type annotation mismatch: declared integer, contains boolean."""
         code = "let nums list of integer = [true, false]"
         self._expect_type_error(code, "cannot assign list of boolean to variable 'nums' of type list of integer")
     
-    def test_list_type_annotation_mismatch_boolean(self):
+    def test_list_type_annotation_mismatch_boolean(self)  -> None:
         """Test list type annotation mismatch: declared boolean, contains integer."""
         code = "let flags list of boolean = [1, 2, 3]"
         self._expect_type_error(code, "cannot assign list of integer to variable 'flags' of type list of boolean")
     
-    def test_repeat_function_type_check_integer(self):
+    def test_repeat_function_type_check_integer(self)  -> None:
         """Test repeat function with integer value."""
         code = "let zeros list of integer = repeat(0, 5)"
         self._compile_and_check(code)
     
-    def test_repeat_function_type_check_boolean(self):
+    def test_repeat_function_type_check_boolean(self)  -> None:
         """Test repeat function with boolean value."""
         code = "let flags list of boolean = repeat(true, 3)"
         self._compile_and_check(code)
     
-    def test_repeat_function_type_check_float(self):
+    def test_repeat_function_type_check_float(self)  -> None:
         """Test repeat function with float value."""
         code = "let values list of float = repeat(3.14, 2)"
         self._compile_and_check(code)
     
-    def test_repeat_function_type_mismatch_value(self):
+    def test_repeat_function_type_mismatch_value(self)  -> None:
         """Test repeat function with wrong value type."""
         code = "let nums list of integer = repeat(true, 5)"
         self._expect_type_error(code, "cannot assign list of boolean to variable 'nums' of type list of integer")
     
-    def test_repeat_function_type_mismatch_count(self):
+    def test_repeat_function_type_mismatch_count(self)  -> None:
         """Test repeat function with non-integer count."""
         code = "let nums list of integer = repeat(0, true)"
         self._expect_type_error(code, "Repeat count must be integer")
     
-    def test_len_function_type_check(self):
+    def test_len_function_type_check(self)  -> None:
         """Test len function returns integer."""
         code = code_block("""
             let nums list of integer = [1, 2, 3]
@@ -665,7 +661,7 @@ class TestTypeSystem(unittest.TestCase):
         """)
         self._compile_and_check(code)
     
-    def test_len_function_on_non_list(self):
+    def test_len_function_on_non_list(self)  -> None:
         """Test len function type error on non-list."""
         code = code_block("""
             let x integer = 5
@@ -673,7 +669,7 @@ class TestTypeSystem(unittest.TestCase):
         """)
         self._expect_type_error(code, "Cannot get length of non-list")
     
-    def test_list_access_type_check(self):
+    def test_list_access_type_check(self)  -> None:
         """Test list access returns correct element type."""
         code = code_block("""
             let nums list of integer = [1, 2, 3]
@@ -681,7 +677,7 @@ class TestTypeSystem(unittest.TestCase):
         """)
         self._compile_and_check(code)
     
-    def test_list_access_wrong_index_type(self):
+    def test_list_access_wrong_index_type(self)  -> None:
         """Test list access with non-integer index."""
         code = code_block("""
             let nums list of integer = [1, 2, 3]
@@ -689,7 +685,7 @@ class TestTypeSystem(unittest.TestCase):
         """)
         self._expect_type_error(code, "List index must be integer")
     
-    def test_list_access_on_non_list(self):
+    def test_list_access_on_non_list(self)  -> None:
         """Test list access type error on non-list."""
         code = code_block("""
             let x integer = 5
@@ -697,7 +693,7 @@ class TestTypeSystem(unittest.TestCase):
         """)
         self._expect_type_error(code, "Cannot index into non-list")
     
-    def test_list_assignment_type_check(self):
+    def test_list_assignment_type_check(self)  -> None:
         """Test list assignment with correct type."""
         code = code_block("""
             let nums list of integer = [1, 2, 3]
@@ -705,7 +701,7 @@ class TestTypeSystem(unittest.TestCase):
         """)
         self._compile_and_check(code)
     
-    def test_list_assignment_type_mismatch(self):
+    def test_list_assignment_type_mismatch(self)  -> None:
         """Test list assignment with wrong value type."""
         code = code_block("""
             let nums list of integer = [1, 2, 3]
@@ -713,7 +709,7 @@ class TestTypeSystem(unittest.TestCase):
         """)
         self._expect_type_error(code, "cannot assign boolean to list element of type integer")
     
-    def test_list_assignment_wrong_index_type(self):
+    def test_list_assignment_wrong_index_type(self)  -> None:
         """Test list assignment with non-integer index."""
         code = code_block("""
             let nums list of integer = [1, 2, 3]
@@ -721,7 +717,7 @@ class TestTypeSystem(unittest.TestCase):
         """)
         self._expect_type_error(code, "List index must be integer")
     
-    def test_list_assignment_on_non_list(self):
+    def test_list_assignment_on_non_list(self)  -> None:
         """Test list assignment on non-list variable."""
         code = code_block("""
             let x integer = 5
@@ -729,7 +725,7 @@ class TestTypeSystem(unittest.TestCase):
         """)
         self._expect_type_error(code, "Cannot index into non-list variable 'x' of type integer")
     
-    def test_list_with_variable_elements_type_check(self):
+    def test_list_with_variable_elements_type_check(self)  -> None:
         """Test list with variable elements of correct type."""
         code = code_block("""
             let x integer = 10
@@ -738,7 +734,7 @@ class TestTypeSystem(unittest.TestCase):
         """)
         self._compile_and_check(code)
     
-    def test_list_with_expression_elements_type_check(self):
+    def test_list_with_expression_elements_type_check(self)  -> None:
         """Test list with expression elements of correct type."""
         code = code_block("""
             let x integer = 10
@@ -747,7 +743,7 @@ class TestTypeSystem(unittest.TestCase):
         """)
         self._compile_and_check(code)
     
-    def test_list_with_wrong_variable_type(self):
+    def test_list_with_wrong_variable_type(self)  -> None:
         """Test list with variable elements of wrong type."""
         code = code_block("""
             let x integer = 10
@@ -756,7 +752,7 @@ class TestTypeSystem(unittest.TestCase):
         """)
         self._expect_type_error(code, "List elements must be homogeneous")
     
-    def test_list_with_wrong_expression_type(self):
+    def test_list_with_wrong_expression_type(self)  -> None:
         """Test list with expression elements of wrong type."""
         code = code_block("""
             let x integer = 10
@@ -764,7 +760,7 @@ class TestTypeSystem(unittest.TestCase):
         """)
         self._expect_type_error(code, "List elements must be homogeneous")
     
-    def test_nested_list_operations_type_check(self):
+    def test_nested_list_operations_type_check(self)  -> None:
         """Test complex nested list operations."""
         code = code_block("""
             let nums list of integer = [1, 2, 3]
@@ -773,7 +769,7 @@ class TestTypeSystem(unittest.TestCase):
         """)
         self._compile_and_check(code)
     
-    def test_list_in_function_parameter_type_check(self):
+    def test_list_in_function_parameter_type_check(self)  -> None:
         """Test list type in function parameter."""
         code = code_block("""
             def getfirst(data list of integer) returns integer
@@ -783,7 +779,7 @@ class TestTypeSystem(unittest.TestCase):
         """)
         self._compile_and_check(code)
     
-    def test_list_function_parameter_type_mismatch(self):
+    def test_list_function_parameter_type_mismatch(self)  -> None:
         """Test list function parameter with wrong argument type."""
         code = code_block("""
             def getfirst(data list of integer) returns integer
@@ -793,7 +789,7 @@ class TestTypeSystem(unittest.TestCase):
         """)
         self._expect_type_error(code, "expected list of integer, got integer")
     
-    def test_list_function_parameter_element_type_mismatch(self):
+    def test_list_function_parameter_element_type_mismatch(self)  -> None:
         """Test list function parameter with wrong element type."""
         code = code_block("""
             def getfirst(data list of integer) returns integer
@@ -803,7 +799,7 @@ class TestTypeSystem(unittest.TestCase):
         """)
         self._expect_type_error(code, "expected list of integer, got list of boolean")
     
-    def test_list_return_type_check(self):
+    def test_list_return_type_check(self)  -> None:
         """Test function returning list type."""
         code = code_block("""
             def makelist() returns list of integer
@@ -812,7 +808,7 @@ class TestTypeSystem(unittest.TestCase):
         """)
         self._compile_and_check(code)
     
-    def test_list_return_type_mismatch(self):
+    def test_list_return_type_mismatch(self)  -> None:
         """Test function returning wrong list type."""
         code = code_block("""
             def makelist() returns list of integer
@@ -821,7 +817,7 @@ class TestTypeSystem(unittest.TestCase):
         """)
         self._expect_type_error(code, "Return type mismatch: expected list of integer")
     
-    def test_list_return_element_type_mismatch(self):
+    def test_list_return_element_type_mismatch(self)  -> None:
         """Test function returning list with wrong element type."""
         code = code_block("""
             def makelist() returns list of integer
@@ -830,7 +826,7 @@ class TestTypeSystem(unittest.TestCase):
         """)
         self._expect_type_error(code, "Return type mismatch: expected list of integer, got list of boolean")
     
-    def test_complex_list_program_type_check(self):
+    def test_complex_list_program_type_check(self)  -> None:
         """Test complex program with multiple list operations."""
         code = code_block("""
             def sumlist(nums list of integer) returns integer
@@ -852,7 +848,7 @@ class TestTypeSystem(unittest.TestCase):
         """)
         self._compile_and_check(code)
     
-    def test_list_variable_shadowing_type_check(self):
+    def test_list_variable_shadowing_type_check(self)  -> None:
         """Test list variable shadowing in different scopes."""
         code = code_block("""
             let nums list of integer = [1, 2, 3]
@@ -863,13 +859,13 @@ class TestTypeSystem(unittest.TestCase):
         """)
         self._compile_and_check(code)
     
-    def test_empty_list_works_with_repeat(self):
+    def test_empty_list_works_with_repeat(self)  -> None:
         """Test that empty lists work using repeat."""
         code = "let empty list of integer = repeat(0, 0)"
         # This should work fine since we have explicit typing
         self._compile_and_check(code)
     
-    def test_list_operations_with_variables_work(self):
+    def test_list_operations_with_variables_work(self)  -> None:
         """Test that list operations with proper variable names work."""
         code = code_block("""
             let first list of integer = [1, 2, 3]

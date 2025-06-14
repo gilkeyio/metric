@@ -1,7 +1,7 @@
 from __future__ import annotations
 from enum import Enum
 from dataclasses import dataclass
-from typing import List, TYPE_CHECKING, Any
+from typing import List, TYPE_CHECKING, Any, Sequence
 
 if TYPE_CHECKING:
     from .visitor import ASTVisitor
@@ -225,4 +225,4 @@ class Return:
 
 Statement = Let | Print | If | While | Set | ListAssignment | Comment | FunctionDeclaration | Return
 
-AbstractSyntaxTree = List[Statement]
+AbstractSyntaxTree = Sequence[Statement]

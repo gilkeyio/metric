@@ -1,26 +1,24 @@
 #!/usr/bin/env python3
 
 import sys
+from typing import Generator
 import unittest
-import os
 from contextlib import contextmanager
 from io import StringIO
 
-# Add the test directory to Python path for imports
-sys.path.insert(0, os.path.dirname(__file__))
 
 from metric.metric_ast import *
 from metric.evaluator import Environment, evaluate_expression, execute_statement, execute, EvaluationError
 from metric.tokenizer import tokenize
 from metric.parser import parse
 from metric.type_checker import type_check
-from test_utils import code_block
+from test.test_utils import code_block
 
 
 class TestEvaluator(unittest.TestCase):
     
     @contextmanager
-    def capture_stdout(self):
+    def capture_stdout(self) -> Generator[StringIO, None, None]:
         """Context manager to capture stdout."""
         captured_output = StringIO()
         old_stdout = sys.stdout
@@ -30,57 +28,57 @@ class TestEvaluator(unittest.TestCase):
         finally:
             sys.stdout = old_stdout
     
-    def test_evaluate_integer_literal(self):
+    def test_evaluate_integer_literal(self) -> None:
         env = Environment.empty()
         expr = IntegerLiteral(42)
         result = evaluate_expression(env, expr)
         self.assertEqual(result, 42)
     
-    def test_evaluate_variable_found(self):
+    def test_evaluate_variable_found(self) -> None:
         env = Environment.empty().add("x", 10)
         expr = Variable("x")
         result = evaluate_expression(env, expr)
         self.assertEqual(result, 10)
     
-    def test_evaluate_variable_not_found(self):
+    def test_evaluate_variable_not_found(self) -> None:
         env = Environment.empty()
         expr = Variable("undefined")
         with self.assertRaises(EvaluationError) as cm:
             evaluate_expression(env, expr)
         self.assertEqual(str(cm.exception), "Undefined variable: undefined")
     
-    def test_evaluate_addition(self):
+    def test_evaluate_addition(self) -> None:
         env = Environment.empty()
         expr = BinaryExpression(IntegerLiteral(5), BinaryOperator.ADDITION, IntegerLiteral(3))
         result = evaluate_expression(env, expr)
         self.assertEqual(result, 8)
     
-    def test_evaluate_subtraction(self):
+    def test_evaluate_subtraction(self) -> None:
         env = Environment.empty()
         expr = BinaryExpression(IntegerLiteral(10), BinaryOperator.SUBTRACTION, IntegerLiteral(4))
         result = evaluate_expression(env, expr)
         self.assertEqual(result, 6)
     
-    def test_evaluate_multiplication(self):
+    def test_evaluate_multiplication(self) -> None:
         env = Environment.empty()
         expr = BinaryExpression(IntegerLiteral(6), BinaryOperator.MULTIPLICATION, IntegerLiteral(7))
         result = evaluate_expression(env, expr)
         self.assertEqual(result, 42)
     
-    def test_evaluate_division(self):
+    def test_evaluate_division(self) -> None:
         env = Environment.empty()
         expr = BinaryExpression(IntegerLiteral(15), BinaryOperator.DIVISION, IntegerLiteral(3))
         result = evaluate_expression(env, expr)
         self.assertEqual(result, 5)
     
-    def test_evaluate_division_by_zero(self):
+    def test_evaluate_division_by_zero(self) -> None:
         env = Environment.empty()
         expr = BinaryExpression(IntegerLiteral(10), BinaryOperator.DIVISION, IntegerLiteral(0))
         with self.assertRaises(EvaluationError) as cm:
             evaluate_expression(env, expr)
         self.assertEqual(str(cm.exception), "Division by zero")
     
-    def test_evaluate_complex_expression(self):
+    def test_evaluate_complex_expression(self) -> None:
         env = Environment.empty().add("x", 5).add("y", 3)
         expr = BinaryExpression(
             BinaryExpression(Variable("x"), BinaryOperator.MULTIPLICATION, IntegerLiteral(2)),
@@ -90,7 +88,7 @@ class TestEvaluator(unittest.TestCase):
         result = evaluate_expression(env, expr)
         self.assertEqual(result, 12)
     
-    def test_execute_let_statement(self):
+    def test_execute_let_statement(self) -> None:
         env = Environment.empty()
         stmt = Let("x", Type.INTEGER, IntegerLiteral(42))
         new_env, result = execute_statement(env, stmt)
@@ -98,14 +96,14 @@ class TestEvaluator(unittest.TestCase):
         x_value = new_env.find("x")
         self.assertEqual(x_value, 42)
     
-    def test_execute_let_statement_already_bound(self):
+    def test_execute_let_statement_already_bound(self) -> None:
         env = Environment.empty().add("x", 5)
         stmt = Let("x", Type.INTEGER, IntegerLiteral(42))
         with self.assertRaises(EvaluationError) as cm:
             execute_statement(env, stmt)
         self.assertEqual(str(cm.exception), "Variable already bound: x")
     
-    def test_execute_print_statement(self):
+    def test_execute_print_statement(self) -> None:
         env = Environment.empty()
         stmt = Print(IntegerLiteral(123))
         
@@ -114,7 +112,7 @@ class TestEvaluator(unittest.TestCase):
             self.assertEqual(result, 123)
             self.assertEqual(captured_output.getvalue().strip(), "123")
     
-    def test_execute_print_with_variable(self):
+    def test_execute_print_with_variable(self) -> None:
         env = Environment.empty().add("value", 99)
         stmt = Print(Variable("value"))
         
@@ -123,13 +121,13 @@ class TestEvaluator(unittest.TestCase):
             self.assertEqual(result, 99)
             self.assertEqual(captured_output.getvalue().strip(), "99")
     
-    def test_execute_single_statement(self):
-        ast = [Let("x", Type.INTEGER, IntegerLiteral(5))]
+    def test_execute_single_statement(self) -> None:
+        ast: list[Statement] = [Let("x", Type.INTEGER, IntegerLiteral(5))]
         results = execute(ast)[0]
         self.assertEqual(results, [])
     
-    def test_execute_multiple_statements(self):
-        ast = [
+    def test_execute_multiple_statements(self) -> None:
+        ast: list[Statement] = [
             Let("x", Type.INTEGER, IntegerLiteral(10)),
             Let("y", Type.INTEGER, IntegerLiteral(5)),
             Print(BinaryExpression(Variable("x"), BinaryOperator.ADDITION, Variable("y")))
@@ -140,8 +138,8 @@ class TestEvaluator(unittest.TestCase):
             self.assertEqual(results, [15])
             self.assertEqual(captured_output.getvalue().strip(), "15")
     
-    def test_execute_complex_program(self):
-        ast = [
+    def test_execute_complex_program(self) -> None:
+        ast: list[Statement] = [
             Let("a", Type.INTEGER, IntegerLiteral(2)),
             Let("b", Type.INTEGER, IntegerLiteral(3)),
             Let("c", Type.INTEGER, BinaryExpression(Variable("a"), BinaryOperator.MULTIPLICATION, Variable("b"))),
@@ -155,8 +153,8 @@ class TestEvaluator(unittest.TestCase):
             output_lines = captured_output.getvalue().strip().split('\n')
             self.assertEqual(output_lines, ["6", "16"])
     
-    def test_execute_variable_redefinition_error(self):
-        ast = [
+    def test_execute_variable_redefinition_error(self) -> None:
+        ast: list[Statement] = [
             Let("x", Type.INTEGER, IntegerLiteral(5)),
             Print(Variable("x")),
             Let("x", Type.INTEGER, IntegerLiteral(10)),  # This should fail
@@ -167,7 +165,7 @@ class TestEvaluator(unittest.TestCase):
             execute(ast)
         self.assertEqual(str(cm.exception), "Variable already bound: x")
     
-    def test_operator_precedence_in_evaluation(self):
+    def test_operator_precedence_in_evaluation(self) -> None:
         env = Environment.empty()
         expr = BinaryExpression(
             IntegerLiteral(2),
@@ -177,7 +175,7 @@ class TestEvaluator(unittest.TestCase):
         result = evaluate_expression(env, expr)
         self.assertEqual(result, 14)
     
-    def test_nested_expressions(self):
+    def test_nested_expressions(self) -> None:
         env = Environment.empty()
         expr = BinaryExpression(
             BinaryExpression(
@@ -191,7 +189,7 @@ class TestEvaluator(unittest.TestCase):
         result = evaluate_expression(env, expr)
         self.assertEqual(result, 12)
     
-    def test_error_propagation(self):
+    def test_error_propagation(self) -> None:
         env = Environment.empty()
         expr = BinaryExpression(
             Variable("undefined"),
@@ -203,141 +201,141 @@ class TestEvaluator(unittest.TestCase):
         self.assertEqual(str(cm.exception), "Undefined variable: undefined")
     
     # Boolean literal tests
-    def test_evaluate_true_literal(self):
+    def test_evaluate_true_literal(self) -> None:
         env = Environment.empty()
         expr = BooleanLiteral(True)
         result = evaluate_expression(env, expr)
         self.assertEqual(result, True)
     
-    def test_evaluate_false_literal(self):
+    def test_evaluate_false_literal(self) -> None:
         env = Environment.empty()
         expr = BooleanLiteral(False)
         result = evaluate_expression(env, expr)
         self.assertEqual(result, False)
     
     # Comparison operator tests
-    def test_evaluate_less_than_true(self):
+    def test_evaluate_less_than_true(self) -> None:
         env = Environment.empty()
         expr = BinaryExpression(IntegerLiteral(5), BinaryOperator.LESS_THAN, IntegerLiteral(10))
         result = evaluate_expression(env, expr)
         self.assertEqual(result, True)
     
-    def test_evaluate_less_than_false(self):
+    def test_evaluate_less_than_false(self) -> None:
         env = Environment.empty()
         expr = BinaryExpression(IntegerLiteral(10), BinaryOperator.LESS_THAN, IntegerLiteral(5))
         result = evaluate_expression(env, expr)
         self.assertEqual(result, False)
     
-    def test_evaluate_greater_than_true(self):
+    def test_evaluate_greater_than_true(self) -> None:
         env = Environment.empty()
         expr = BinaryExpression(IntegerLiteral(10), BinaryOperator.GREATER_THAN, IntegerLiteral(5))
         result = evaluate_expression(env, expr)
         self.assertEqual(result, True)
     
-    def test_evaluate_greater_than_false(self):
+    def test_evaluate_greater_than_false(self) -> None:
         env = Environment.empty()
         expr = BinaryExpression(IntegerLiteral(5), BinaryOperator.GREATER_THAN, IntegerLiteral(10))
         result = evaluate_expression(env, expr)
         self.assertEqual(result, False)
     
-    def test_evaluate_less_than_or_equal_true(self):
+    def test_evaluate_less_than_or_equal_true(self) -> None:
         env = Environment.empty()
         expr = BinaryExpression(IntegerLiteral(5), BinaryOperator.LESS_THAN_OR_EQUAL, IntegerLiteral(5))
         result = evaluate_expression(env, expr)
         self.assertEqual(result, True)
     
-    def test_evaluate_greater_than_or_equal_true(self):
+    def test_evaluate_greater_than_or_equal_true(self) -> None:
         env = Environment.empty()
         expr = BinaryExpression(IntegerLiteral(10), BinaryOperator.GREATER_THAN_OR_EQUAL, IntegerLiteral(10))
         result = evaluate_expression(env, expr)
         self.assertEqual(result, True)
     
-    def test_evaluate_equal_equal_true(self):
+    def test_evaluate_equal_equal_true(self) -> None:
         env = Environment.empty()
         expr = BinaryExpression(IntegerLiteral(5), BinaryOperator.EQUAL_EQUAL, IntegerLiteral(5))
         result = evaluate_expression(env, expr)
         self.assertEqual(result, True)
     
-    def test_evaluate_equal_equal_false(self):
+    def test_evaluate_equal_equal_false(self) -> None:
         env = Environment.empty()
         expr = BinaryExpression(IntegerLiteral(5), BinaryOperator.EQUAL_EQUAL, IntegerLiteral(3))
         result = evaluate_expression(env, expr)
         self.assertEqual(result, False)
     
-    def test_evaluate_not_equal_true(self):
+    def test_evaluate_not_equal_true(self) -> None:
         env = Environment.empty()
         expr = BinaryExpression(IntegerLiteral(5), BinaryOperator.NOT_EQUAL, IntegerLiteral(3))
         result = evaluate_expression(env, expr)
         self.assertEqual(result, True)
     
-    def test_evaluate_not_equal_false(self):
+    def test_evaluate_not_equal_false(self) -> None:
         env = Environment.empty()
         expr = BinaryExpression(IntegerLiteral(5), BinaryOperator.NOT_EQUAL, IntegerLiteral(5))
         result = evaluate_expression(env, expr)
         self.assertEqual(result, False)
     
     # Logical operator tests
-    def test_evaluate_and_true_true(self):
+    def test_evaluate_and_true_true(self) -> None:
         env = Environment.empty()
         expr = BinaryExpression(BooleanLiteral(True), BinaryOperator.AND, BooleanLiteral(True))
         result = evaluate_expression(env, expr)
         self.assertEqual(result, True)
     
-    def test_evaluate_and_true_false(self):
+    def test_evaluate_and_true_false(self) -> None:
         env = Environment.empty()
         expr = BinaryExpression(BooleanLiteral(True), BinaryOperator.AND, BooleanLiteral(False))
         result = evaluate_expression(env, expr)
         self.assertEqual(result, False)
     
-    def test_evaluate_and_false_true(self):
+    def test_evaluate_and_false_true(self) -> None:
         env = Environment.empty()
         expr = BinaryExpression(BooleanLiteral(False), BinaryOperator.AND, BooleanLiteral(True))
         result = evaluate_expression(env, expr)
         self.assertEqual(result, False)
     
-    def test_evaluate_and_false_false(self):
+    def test_evaluate_and_false_false(self) -> None:
         env = Environment.empty()
         expr = BinaryExpression(BooleanLiteral(False), BinaryOperator.AND, BooleanLiteral(False))
         result = evaluate_expression(env, expr)
         self.assertEqual(result, False)
     
-    def test_evaluate_or_true_true(self):
+    def test_evaluate_or_true_true(self) -> None:
         env = Environment.empty()
         expr = BinaryExpression(BooleanLiteral(True), BinaryOperator.OR, BooleanLiteral(True))
         result = evaluate_expression(env, expr)
         self.assertEqual(result, True)
     
-    def test_evaluate_or_true_false(self):
+    def test_evaluate_or_true_false(self) -> None:
         env = Environment.empty()
         expr = BinaryExpression(BooleanLiteral(True), BinaryOperator.OR, BooleanLiteral(False))
         result = evaluate_expression(env, expr)
         self.assertEqual(result, True)
     
-    def test_evaluate_or_false_true(self):
+    def test_evaluate_or_false_true(self) -> None:
         env = Environment.empty()
         expr = BinaryExpression(BooleanLiteral(False), BinaryOperator.OR, BooleanLiteral(True))
         result = evaluate_expression(env, expr)
         self.assertEqual(result, True)
     
-    def test_evaluate_or_false_false(self):
+    def test_evaluate_or_false_false(self) -> None:
         env = Environment.empty()
         expr = BinaryExpression(BooleanLiteral(False), BinaryOperator.OR, BooleanLiteral(False))
         result = evaluate_expression(env, expr)
         self.assertEqual(result, False)
     
-    def test_evaluate_and_with_variables(self):
+    def test_evaluate_and_with_variables(self) -> None:
         env = Environment.empty().add("x", True).add("y", False)
         expr = BinaryExpression(Variable("x"), BinaryOperator.AND, Variable("y"))
         result = evaluate_expression(env, expr)
         self.assertEqual(result, False)
     
-    def test_evaluate_or_with_variables(self):
+    def test_evaluate_or_with_variables(self) -> None:
         env = Environment.empty().add("x", True).add("y", False)
         expr = BinaryExpression(Variable("x"), BinaryOperator.OR, Variable("y"))
         result = evaluate_expression(env, expr)
         self.assertEqual(result, True)
     
-    def test_evaluate_complex_logical_expression(self):
+    def test_evaluate_complex_logical_expression(self) -> None:
         env = Environment.empty().add("a", True).add("b", False).add("c", True)
         # (a and b) or c => (True and False) or True => False or True => True
         expr = BinaryExpression(
@@ -348,32 +346,32 @@ class TestEvaluator(unittest.TestCase):
         result = evaluate_expression(env, expr)
         self.assertEqual(result, True)
     
-    def test_evaluate_logical_not_true(self):
+    def test_evaluate_logical_not_true(self) -> None:
         env = Environment.empty()
         expr = UnaryExpression(UnaryOperator.NOT, BooleanLiteral(True))
         result = evaluate_expression(env, expr)
         self.assertEqual(result, False)
     
-    def test_evaluate_logical_not_false(self):
+    def test_evaluate_logical_not_false(self) -> None:
         env = Environment.empty()
         expr = UnaryExpression(UnaryOperator.NOT, BooleanLiteral(False))
         result = evaluate_expression(env, expr)
         self.assertEqual(result, True)
     
-    def test_evaluate_logical_not_variable(self):
+    def test_evaluate_logical_not_variable(self) -> None:
         env = Environment.empty().add("flag", True)
         expr = UnaryExpression(UnaryOperator.NOT, Variable("flag"))
         result = evaluate_expression(env, expr)
         self.assertEqual(result, False)
     
-    def test_evaluate_double_logical_not(self):
+    def test_evaluate_double_logical_not(self) -> None:
         env = Environment.empty()
         expr = UnaryExpression(UnaryOperator.NOT, 
                               UnaryExpression(UnaryOperator.NOT, BooleanLiteral(True)))
         result = evaluate_expression(env, expr)
         self.assertEqual(result, True)
     
-    def test_evaluate_logical_not_with_and(self):
+    def test_evaluate_logical_not_with_and(self) -> None:
         env = Environment.empty().add("x", True).add("y", False)
         # not x and y => (not True) and False => False and False => False
         expr = BinaryExpression(
@@ -384,7 +382,7 @@ class TestEvaluator(unittest.TestCase):
         result = evaluate_expression(env, expr)
         self.assertEqual(result, False)
     
-    def test_evaluate_logical_not_with_parentheses(self):
+    def test_evaluate_logical_not_with_parentheses(self) -> None:
         env = Environment.empty().add("x", True).add("y", False)
         # not (x and y) => not (True and False) => not False => True
         expr = UnaryExpression(UnaryOperator.NOT,
@@ -392,7 +390,7 @@ class TestEvaluator(unittest.TestCase):
         result = evaluate_expression(env, expr)
         self.assertEqual(result, True)
     
-    def test_evaluate_not_precedence_higher_than_and(self):
+    def test_evaluate_not_precedence_higher_than_and(self) -> None:
         env = Environment.empty().add("x", True).add("y", True)
         # not x and y => (not True) and True => False and True => False
         expr = BinaryExpression(
@@ -403,7 +401,7 @@ class TestEvaluator(unittest.TestCase):
         result = evaluate_expression(env, expr)
         self.assertEqual(result, False)
     
-    def test_evaluate_not_precedence_higher_than_or(self):
+    def test_evaluate_not_precedence_higher_than_or(self) -> None:
         env = Environment.empty().add("x", False).add("y", True)
         # not x or y => (not False) or True => True or True => True
         expr = BinaryExpression(
@@ -414,7 +412,7 @@ class TestEvaluator(unittest.TestCase):
         result = evaluate_expression(env, expr)
         self.assertEqual(result, True)
     
-    def test_evaluate_complex_not_precedence(self):
+    def test_evaluate_complex_not_precedence(self) -> None:
         env = Environment.empty().add("x", True).add("y", False).add("z", True)
         # not x and y or z => ((not True) and False) or True => (False and False) or True => False or True => True
         expr = BinaryExpression(
@@ -430,8 +428,8 @@ class TestEvaluator(unittest.TestCase):
         self.assertEqual(result, True)
     
     # Boolean execution tests
-    def test_execute_print_boolean(self):
-        ast = [Print(BooleanLiteral(True))]
+    def test_execute_print_boolean(self) -> None:
+        ast: list[Statement] = [Print(BooleanLiteral(True))]
         
         with self.capture_stdout() as captured_output:
             results = execute(ast)[0]
@@ -439,8 +437,8 @@ class TestEvaluator(unittest.TestCase):
             output_lines = captured_output.getvalue().strip()
             self.assertEqual(output_lines, "true")
     
-    def test_execute_boolean_assignment_and_comparison(self):
-        ast = [
+    def test_execute_boolean_assignment_and_comparison(self) -> None:
+        ast: list[Statement] = [
             Let("x", Type.INTEGER, IntegerLiteral(10)),
             Let("y", Type.INTEGER, IntegerLiteral(5)),
             Let("result", Type.BOOLEAN, BinaryExpression(Variable("x"), BinaryOperator.GREATER_THAN, Variable("y"))),
@@ -453,8 +451,8 @@ class TestEvaluator(unittest.TestCase):
             output_lines = captured_output.getvalue().strip()
             self.assertEqual(output_lines, "true")
     
-    def test_execute_mixed_boolean_and_integer_operations(self):
-        ast = [
+    def test_execute_mixed_boolean_and_integer_operations(self) -> None:
+        ast: list[Statement] = [
             Let("a", Type.INTEGER, IntegerLiteral(15)),
             Let("b", Type.INTEGER, IntegerLiteral(10)),
             Let("sum", Type.INTEGER, BinaryExpression(Variable("a"), BinaryOperator.ADDITION, Variable("b"))),
@@ -470,8 +468,8 @@ class TestEvaluator(unittest.TestCase):
             self.assertEqual(output_lines, ["25", "true"])
     
     # If statement tests
-    def test_execute_if_true(self):
-        ast = [If(BooleanLiteral(True), [Print(IntegerLiteral(42))])]
+    def test_execute_if_true(self) -> None:
+        ast: list[Statement] = [If(BooleanLiteral(True), [Print(IntegerLiteral(42))])]
         
         with self.capture_stdout() as captured_output:
             results = execute(ast)[0]
@@ -479,8 +477,8 @@ class TestEvaluator(unittest.TestCase):
             output_lines = captured_output.getvalue().strip()
             self.assertEqual(output_lines, "42")
     
-    def test_execute_if_false(self):
-        ast = [If(BooleanLiteral(False), [Print(IntegerLiteral(42))])]
+    def test_execute_if_false(self) -> None:
+        ast: list[Statement] = [If(BooleanLiteral(False), [Print(IntegerLiteral(42))])]
         
         with self.capture_stdout() as captured_output:
             results = execute(ast)[0]
@@ -488,8 +486,8 @@ class TestEvaluator(unittest.TestCase):
             output_lines = captured_output.getvalue().strip()
             self.assertEqual(output_lines, "")
     
-    def test_execute_if_with_comparison(self):
-        ast = [
+    def test_execute_if_with_comparison(self) -> None:
+        ast: list[Statement] = [
             Let("x", Type.INTEGER, IntegerLiteral(10)),
             If(BinaryExpression(Variable("x"), BinaryOperator.GREATER_THAN, IntegerLiteral(5)), [Print(Variable("x"))])
         ]
@@ -500,8 +498,8 @@ class TestEvaluator(unittest.TestCase):
             output_lines = captured_output.getvalue().strip()
             self.assertEqual(output_lines, "10")
     
-    def test_execute_if_with_multiple_statements(self):
-        ast = [If(BooleanLiteral(True), [
+    def test_execute_if_with_multiple_statements(self) -> None:
+        ast: list[Statement] = [If(BooleanLiteral(True), [
             Let("x", Type.INTEGER, IntegerLiteral(5)),
             Let("y", Type.INTEGER, IntegerLiteral(10)),
             Print(BinaryExpression(Variable("x"), BinaryOperator.ADDITION, Variable("y")))
@@ -513,8 +511,8 @@ class TestEvaluator(unittest.TestCase):
             output_lines = captured_output.getvalue().strip()
             self.assertEqual(output_lines, "15")
     
-    def test_execute_if_followed_by_regular_statement(self):
-        ast = [
+    def test_execute_if_followed_by_regular_statement(self) -> None:
+        ast: list[Statement] = [
             If(BooleanLiteral(True), [Print(IntegerLiteral(1))]),
             Print(IntegerLiteral(2))
         ]
@@ -525,9 +523,9 @@ class TestEvaluator(unittest.TestCase):
             output_lines = captured_output.getvalue().strip().split('\n')
             self.assertEqual(output_lines, ["1", "2"])
     
-    def test_execute_if_variable_scoping(self):
+    def test_execute_if_variable_scoping(self) -> None:
         # Variables defined inside if should be available outside
-        ast = [
+        ast: list[Statement] = [
             If(BooleanLiteral(True), [Let("x", Type.INTEGER, IntegerLiteral(42))]),
             Print(Variable("x"))
         ]
@@ -538,9 +536,9 @@ class TestEvaluator(unittest.TestCase):
             output_lines = captured_output.getvalue().strip()
             self.assertEqual(output_lines, "42")
     
-    def test_execute_if_false_no_variable_definition(self):
+    def test_execute_if_false_no_variable_definition(self) -> None:
         # Variables not defined when if condition is false
-        ast = [
+        ast: list[Statement] = [
             If(BooleanLiteral(False), [Let("x", Type.INTEGER, IntegerLiteral(42))]),
             Print(Variable("x"))
         ]
@@ -550,9 +548,9 @@ class TestEvaluator(unittest.TestCase):
         self.assertEqual(str(cm.exception), "Undefined variable: x")
     
     # Variable modification tests
-    def test_execute_set_statement(self):
+    def test_execute_set_statement(self) -> None:
         # Test basic variable modification
-        ast = [
+        ast: list[Statement] = [
             Let("x", Type.INTEGER, IntegerLiteral(5)),
             Set("x", IntegerLiteral(10)),
             Print(Variable("x"))
@@ -564,17 +562,17 @@ class TestEvaluator(unittest.TestCase):
             output_lines = captured_output.getvalue().strip()
             self.assertEqual(output_lines, "10")
     
-    def test_execute_set_undefined_variable(self):
+    def test_execute_set_undefined_variable(self) -> None:
         # Test modifying undefined variable should fail
-        ast = [Set("undefined", IntegerLiteral(42))]
+        ast: list[Statement] = [Set("undefined", IntegerLiteral(42))]
         
         with self.assertRaises(EvaluationError) as cm:
             execute(ast)
         self.assertEqual(str(cm.exception), "Cannot set undefined variable: undefined")
     
-    def test_execute_set_with_expression(self):
+    def test_execute_set_with_expression(self) -> None:
         # Test setting variable with complex expression
-        ast = [
+        ast: list[Statement] = [
             Let("x", Type.INTEGER, IntegerLiteral(5)),
             Let("y", Type.INTEGER, IntegerLiteral(3)),
             Set("x", BinaryExpression(Variable("x"), BinaryOperator.ADDITION, Variable("y"))),
@@ -588,9 +586,9 @@ class TestEvaluator(unittest.TestCase):
             self.assertEqual(output_lines, "8")
     
     # While loop tests
-    def test_execute_while_simple_countdown(self):
+    def test_execute_while_simple_countdown(self) -> None:
         # Test basic while loop counting down
-        ast = [
+        ast: list[Statement] = [
             Let("counter", Type.INTEGER, IntegerLiteral(3)),
             While(BinaryExpression(Variable("counter"), BinaryOperator.GREATER_THAN, IntegerLiteral(0)), [
                 Print(Variable("counter")),
@@ -604,9 +602,9 @@ class TestEvaluator(unittest.TestCase):
             output_lines = captured_output.getvalue().strip().split('\n')
             self.assertEqual(output_lines, ["3", "2", "1"])
     
-    def test_execute_while_false_condition(self):
+    def test_execute_while_false_condition(self) -> None:
         # Test while loop with false condition (should not execute body)
-        ast = [
+        ast: list[Statement] = [
             Let("x", Type.INTEGER, IntegerLiteral(5)),
             While(BooleanLiteral(False), [
                 Print(Variable("x")),
@@ -621,9 +619,9 @@ class TestEvaluator(unittest.TestCase):
             output_lines = captured_output.getvalue().strip()
             self.assertEqual(output_lines, "5")
     
-    def test_execute_while_with_complex_condition(self):
+    def test_execute_while_with_complex_condition(self) -> None:
         # Test while loop with complex condition
-        ast = [
+        ast: list[Statement] = [
             Let("sum", Type.INTEGER, IntegerLiteral(0)),
             Let("i", Type.INTEGER, IntegerLiteral(1)),
             While(BinaryExpression(Variable("i"), BinaryOperator.LESS_THAN_OR_EQUAL, IntegerLiteral(5)), [
@@ -639,7 +637,7 @@ class TestEvaluator(unittest.TestCase):
             output_lines = captured_output.getvalue().strip()
             self.assertEqual(output_lines, "15")
     
-    def test_execute_logical_not_program(self):
+    def test_execute_logical_not_program(self) -> None:
         # Test a complete program using logical not
         code = code_block("""
             let flag boolean = true
@@ -658,7 +656,7 @@ class TestEvaluator(unittest.TestCase):
             output_lines = captured_output.getvalue().strip().split('\n')
             self.assertEqual(output_lines, ["false", "true"])
     
-    def test_execute_logical_not_precedence_program(self):
+    def test_execute_logical_not_precedence_program(self) -> None:
         # Test a complete program demonstrating not precedence
         code = code_block("""
             let x boolean = true
@@ -687,9 +685,9 @@ class TestEvaluator(unittest.TestCase):
             output_lines = captured_output.getvalue().strip().split('\n')
             self.assertEqual(output_lines, ["false", "true", "true"])
     
-    def test_execute_while_nested_statements(self):
+    def test_execute_while_nested_statements(self) -> None:
         # Test while loop with multiple statements in body
-        ast = [
+        ast: list[Statement] = [
             Let("x", Type.INTEGER, IntegerLiteral(2)),
             Let("result", Type.INTEGER, IntegerLiteral(1)),
             While(BinaryExpression(Variable("x"), BinaryOperator.GREATER_THAN, IntegerLiteral(0)), [
@@ -705,9 +703,9 @@ class TestEvaluator(unittest.TestCase):
             output_lines = captured_output.getvalue().strip().split('\n')
             self.assertEqual(output_lines, ["2", "2"])
     
-    def test_execute_while_variable_scoping(self):
+    def test_execute_while_variable_scoping(self) -> None:
         # Test that variables modified in while loop are visible outside
-        ast = [
+        ast: list[Statement] = [
             Let("x", Type.INTEGER, IntegerLiteral(10)),
             While(BinaryExpression(Variable("x"), BinaryOperator.GREATER_THAN, IntegerLiteral(5)), [
                 Set("x", BinaryExpression(Variable("x"), BinaryOperator.SUBTRACTION, IntegerLiteral(2)))
@@ -721,9 +719,9 @@ class TestEvaluator(unittest.TestCase):
             output_lines = captured_output.getvalue().strip()
             self.assertEqual(output_lines, "4")
     
-    def test_execute_while_followed_by_regular_statement(self):
+    def test_execute_while_followed_by_regular_statement(self) -> None:
         # Test while loop followed by regular statements
-        ast = [
+        ast: list[Statement] = [
             Let("i", Type.INTEGER, IntegerLiteral(1)),
             While(BinaryExpression(Variable("i"), BinaryOperator.LESS_THAN_OR_EQUAL, IntegerLiteral(2)), [
                 Print(Variable("i")),
@@ -738,9 +736,9 @@ class TestEvaluator(unittest.TestCase):
             output_lines = captured_output.getvalue().strip().split('\n')
             self.assertEqual(output_lines, ["1", "2", "99"])
     
-    def test_execute_while_boolean_condition_modification(self):
+    def test_execute_while_boolean_condition_modification(self) -> None:
         # Test while loop that modifies boolean variables
-        ast = [
+        ast: list[Statement] = [
             Let("done", Type.BOOLEAN, BooleanLiteral(False)),
             Let("count", Type.INTEGER, IntegerLiteral(0)),
             While(BinaryExpression(Variable("done"), BinaryOperator.EQUAL_EQUAL, BooleanLiteral(False)), [
@@ -757,20 +755,20 @@ class TestEvaluator(unittest.TestCase):
             self.assertEqual(output_lines, ["1", "2", "3"])
     
     # Modulus operator tests
-    def test_evaluate_modulus_operation(self):
+    def test_evaluate_modulus_operation(self) -> None:
         result = evaluate_expression(Environment(), BinaryExpression(IntegerLiteral(10), BinaryOperator.MODULUS, IntegerLiteral(3)))
         self.assertEqual(result, 1)
     
-    def test_evaluate_modulus_zero_remainder(self):
+    def test_evaluate_modulus_zero_remainder(self) -> None:
         result = evaluate_expression(Environment(), BinaryExpression(IntegerLiteral(15), BinaryOperator.MODULUS, IntegerLiteral(5)))
         self.assertEqual(result, 0)
     
-    def test_evaluate_modulus_larger_divisor(self):
+    def test_evaluate_modulus_larger_divisor(self) -> None:
         result = evaluate_expression(Environment(), BinaryExpression(IntegerLiteral(3), BinaryOperator.MODULUS, IntegerLiteral(5)))
         self.assertEqual(result, 3)
     
-    def test_execute_modulus_statement(self):
-        ast = [
+    def test_execute_modulus_statement(self) -> None:
+        ast: list[Statement] = [
             Let("remainder", Type.INTEGER, BinaryExpression(IntegerLiteral(17), BinaryOperator.MODULUS, IntegerLiteral(5))),
             Print(Variable("remainder"))
         ]
@@ -782,49 +780,50 @@ class TestEvaluator(unittest.TestCase):
             self.assertEqual(output_lines, "2")
     
     # Float literal tests
-    def test_evaluate_float_literal(self):
+    def test_evaluate_float_literal(self) -> None:
         env = Environment.empty()
         expr = FloatLiteral(3.14)
         result = evaluate_expression(env, expr)
         self.assertEqual(result, 3.14)
     
-    def test_evaluate_float_arithmetic(self):
+    def test_evaluate_float_arithmetic(self) -> None:
         env = Environment.empty()
         expr = BinaryExpression(FloatLiteral(2.5), BinaryOperator.ADDITION, FloatLiteral(1.5))
         result = evaluate_expression(env, expr)
         self.assertEqual(result, 4.0)
     
-    def test_evaluate_float_subtraction(self):
+    def test_evaluate_float_subtraction(self) -> None:
         env = Environment.empty()
         expr = BinaryExpression(FloatLiteral(5.5), BinaryOperator.SUBTRACTION, FloatLiteral(2.3))
         result = evaluate_expression(env, expr)
+        assert isinstance(result, float)
         self.assertAlmostEqual(result, 3.2, places=10)
     
-    def test_evaluate_float_multiplication(self):
+    def test_evaluate_float_multiplication(self) -> None:
         env = Environment.empty()
         expr = BinaryExpression(FloatLiteral(2.5), BinaryOperator.MULTIPLICATION, FloatLiteral(4.0))
         result = evaluate_expression(env, expr)
         self.assertEqual(result, 10.0)
     
-    def test_evaluate_float_division(self):
+    def test_evaluate_float_division(self) -> None:
         env = Environment.empty()
         expr = BinaryExpression(FloatLiteral(7.5), BinaryOperator.DIVISION, FloatLiteral(2.5))
         result = evaluate_expression(env, expr)
         self.assertEqual(result, 3.0)
     
-    def test_evaluate_mixed_int_float_arithmetic(self):
+    def test_evaluate_mixed_int_float_arithmetic(self) -> None:
         env = Environment.empty()
         expr = BinaryExpression(IntegerLiteral(5), BinaryOperator.ADDITION, FloatLiteral(2.5))
         result = evaluate_expression(env, expr)
         self.assertEqual(result, 7.5)
     
-    def test_evaluate_float_comparison(self):
+    def test_evaluate_float_comparison(self) -> None:
         env = Environment.empty()
         expr = BinaryExpression(FloatLiteral(3.14), BinaryOperator.GREATER_THAN, FloatLiteral(2.5))
         result = evaluate_expression(env, expr)
         self.assertEqual(result, True)
     
-    def test_execute_float_let_statement(self):
+    def test_execute_float_let_statement(self) -> None:
         env = Environment.empty()
         stmt = Let("pi", Type.FLOAT, FloatLiteral(3.14))
         new_env, result = execute_statement(env, stmt)
@@ -832,8 +831,8 @@ class TestEvaluator(unittest.TestCase):
         pi_value = new_env.find("pi")
         self.assertEqual(pi_value, 3.14)
     
-    def test_execute_print_float(self):
-        ast = [Print(FloatLiteral(3.14))]
+    def test_execute_print_float(self) -> None:
+        ast: list[Statement] = [Print(FloatLiteral(3.14))]
         
         with self.capture_stdout() as captured_output:
             results = execute(ast)[0]
@@ -841,8 +840,8 @@ class TestEvaluator(unittest.TestCase):
             output_lines = captured_output.getvalue().strip()
             self.assertEqual(output_lines, "3.14")
     
-    def test_execute_complex_float_program(self):
-        ast = [
+    def test_execute_complex_float_program(self) -> None:
+        ast: list[Statement] = [
             Let("radius", Type.FLOAT, FloatLiteral(2.5)),
             Let("pi", Type.FLOAT, FloatLiteral(3.14159)),
             Let("area", Type.FLOAT, BinaryExpression(Variable("pi"), BinaryOperator.MULTIPLICATION, 
@@ -854,23 +853,24 @@ class TestEvaluator(unittest.TestCase):
             results = execute(ast)[0]
             expected_area = 3.14159 * 2.5 * 2.5
             self.assertEqual(len(results), 1)
+            assert isinstance(results[0], float)
             self.assertAlmostEqual(results[0], expected_area, places=5)
             output_lines = captured_output.getvalue().strip()
             self.assertAlmostEqual(float(output_lines), expected_area, places=5)
     
     # Comment evaluation tests
-    def test_execute_standalone_comment(self):
+    def test_execute_standalone_comment(self) -> None:
         """Test that standalone comments are skipped in evaluation."""
-        ast = [Comment()]
+        ast: list[Statement] = [Comment()]
         
         with self.capture_stdout() as captured_output:
             results = execute(ast)[0]
             self.assertEqual(results, [])
             self.assertEqual(captured_output.getvalue(), "")
     
-    def test_execute_comment_with_statements(self):
+    def test_execute_comment_with_statements(self) -> None:
         """Test that comments are skipped but other statements execute."""
-        ast = [
+        ast: list[Statement] = [
             Comment(),
             Let("x", Type.INTEGER, IntegerLiteral(42)),
             Comment(),
@@ -883,9 +883,9 @@ class TestEvaluator(unittest.TestCase):
             self.assertEqual(results, [42])
             self.assertEqual(captured_output.getvalue().strip(), "42")
     
-    def test_execute_comment_only_program(self):
+    def test_execute_comment_only_program(self) -> None:
         """Test that a program with only comments produces no output."""
-        ast = [
+        ast: list[Statement] = [
             Comment(),
             Comment(),
             Comment()
@@ -896,9 +896,9 @@ class TestEvaluator(unittest.TestCase):
             self.assertEqual(results, [])
             self.assertEqual(captured_output.getvalue(), "")
     
-    def test_execute_comment_in_if_block(self):
+    def test_execute_comment_in_if_block(self) -> None:
         """Test that comments in if blocks are properly skipped."""
-        ast = [
+        ast: list[Statement] = [
             If(BooleanLiteral(True), [
                 Comment(),
                 Let("x", Type.INTEGER, IntegerLiteral(100)),
@@ -912,9 +912,9 @@ class TestEvaluator(unittest.TestCase):
             self.assertEqual(results, [100])
             self.assertEqual(captured_output.getvalue().strip(), "100")
     
-    def test_execute_comment_in_while_block(self):
+    def test_execute_comment_in_while_block(self) -> None:
         """Test that comments in while blocks are properly skipped."""
-        ast = [
+        ast: list[Statement] = [
             Let("counter", Type.INTEGER, IntegerLiteral(3)),
             While(BinaryExpression(Variable("counter"), BinaryOperator.GREATER_THAN, IntegerLiteral(0)), [
                 Comment(),
@@ -930,9 +930,9 @@ class TestEvaluator(unittest.TestCase):
             output_lines = captured_output.getvalue().strip().split('\n')
             self.assertEqual(output_lines, ['3', '2', '1'])
     
-    def test_execute_complex_program_with_comments(self):
+    def test_execute_complex_program_with_comments(self) -> None:
         """Test a complex program with comments throughout."""
-        ast = [
+        ast: list[Statement] = [
             Comment(),  # Program start comment
             Let("n", Type.INTEGER, IntegerLiteral(5)),
             Comment(),  # Variable comment
@@ -954,7 +954,7 @@ class TestEvaluator(unittest.TestCase):
             self.assertEqual(captured_output.getvalue().strip(), "120")
     
     # Function execution tests
-    def test_execute_simple_function(self):
+    def test_execute_simple_function(self) -> None:
         """Test executing a simple function."""
         code = code_block("""
             def add(x integer, y integer) returns integer
@@ -972,7 +972,7 @@ class TestEvaluator(unittest.TestCase):
             self.assertEqual(results, [15])
             self.assertEqual(captured_output.getvalue().strip(), "15")
     
-    def test_execute_function_with_variables(self):
+    def test_execute_function_with_variables(self) -> None:
         """Test function that uses local variables."""
         code = code_block("""
             def multiply(a integer, b integer) returns integer
@@ -991,7 +991,7 @@ class TestEvaluator(unittest.TestCase):
             self.assertEqual(results, [42])
             self.assertEqual(captured_output.getvalue().strip(), "42")
     
-    def test_execute_nested_function_calls(self):
+    def test_execute_nested_function_calls(self) -> None:
         """Test nested function calls."""
         code = code_block("""
             def add(x integer, y integer) returns integer
@@ -1012,7 +1012,7 @@ class TestEvaluator(unittest.TestCase):
             self.assertEqual(captured_output.getvalue().strip(), "50")
     
     # Comprehensive List Evaluation Tests
-    def test_execute_list_literal_integer(self):
+    def test_execute_list_literal_integer(self) -> None:
         """Test executing list literal with integers."""
         code = code_block("""
             let nums list of integer = [1, 2, 3]
@@ -1028,7 +1028,7 @@ class TestEvaluator(unittest.TestCase):
             self.assertEqual(results, [1, 2, 3])
             self.assertEqual(captured_output.getvalue().strip(), "[1, 2, 3]")
     
-    def test_execute_list_literal_boolean(self):
+    def test_execute_list_literal_boolean(self) -> None:
         """Test executing list literal with booleans."""
         code = code_block("""
             let flags list of boolean = [true, false, true]
@@ -1044,7 +1044,7 @@ class TestEvaluator(unittest.TestCase):
             self.assertEqual(results, [True, False, True])
             self.assertEqual(captured_output.getvalue().strip(), "[true, false, true]")
     
-    def test_execute_empty_list_via_repeat(self):
+    def test_execute_empty_list_via_repeat(self) -> None:
         """Test executing empty list creation using repeat."""
         code = code_block("""
             let empty list of integer = repeat(0, 0)
@@ -1060,7 +1060,7 @@ class TestEvaluator(unittest.TestCase):
             self.assertEqual(results, [])
             self.assertEqual(captured_output.getvalue().strip(), "[]")
     
-    def test_execute_repeat_function(self):
+    def test_execute_repeat_function(self) -> None:
         """Test executing repeat function."""
         code = code_block("""
             let zeros list of integer = repeat(0, 5)
@@ -1076,7 +1076,7 @@ class TestEvaluator(unittest.TestCase):
             self.assertEqual(results, [0, 0, 0, 0, 0])
             self.assertEqual(captured_output.getvalue().strip(), "[0, 0, 0, 0, 0]")
     
-    def test_execute_repeat_function_with_boolean(self):
+    def test_execute_repeat_function_with_boolean(self) -> None:
         """Test executing repeat function with boolean."""
         code = code_block("""
             let flags list of boolean = repeat(true, 3)
@@ -1092,7 +1092,7 @@ class TestEvaluator(unittest.TestCase):
             self.assertEqual(results, [True, True, True])
             self.assertEqual(captured_output.getvalue().strip(), "[true, true, true]")
     
-    def test_execute_list_access(self):
+    def test_execute_list_access(self) -> None:
         """Test executing list access."""
         code = code_block("""
             let nums list of integer = [10, 20, 30]
@@ -1110,7 +1110,7 @@ class TestEvaluator(unittest.TestCase):
             self.assertEqual(results, [10, 20, 30])
             self.assertEqual(captured_output.getvalue().strip(), "10\n20\n30")
     
-    def test_execute_list_access_with_variable(self):
+    def test_execute_list_access_with_variable(self) -> None:
         """Test executing list access with variable index."""
         code = code_block("""
             let nums list of integer = [10, 20, 30]
@@ -1127,7 +1127,7 @@ class TestEvaluator(unittest.TestCase):
             self.assertEqual(results, [20])
             self.assertEqual(captured_output.getvalue().strip(), "20")
     
-    def test_execute_len_function(self):
+    def test_execute_len_function(self) -> None:
         """Test executing len function."""
         code = code_block("""
             let nums list of integer = [1, 2, 3, 4, 5]
@@ -1143,7 +1143,7 @@ class TestEvaluator(unittest.TestCase):
             self.assertEqual(results, [5])
             self.assertEqual(captured_output.getvalue().strip(), "5")
     
-    def test_execute_len_function_empty_list(self):
+    def test_execute_len_function_empty_list(self) -> None:
         """Test executing len function on empty list."""
         code = code_block("""
             let empty list of integer = repeat(0, 0)
@@ -1159,7 +1159,7 @@ class TestEvaluator(unittest.TestCase):
             self.assertEqual(results, [0])
             self.assertEqual(captured_output.getvalue().strip(), "0")
     
-    def test_execute_list_assignment(self):
+    def test_execute_list_assignment(self) -> None:
         """Test executing list assignment."""
         code = code_block("""
             let nums list of integer = [1, 2, 3]
@@ -1176,7 +1176,7 @@ class TestEvaluator(unittest.TestCase):
             self.assertEqual(results, [1, 42, 3])
             self.assertEqual(captured_output.getvalue().strip(), "[1, 42, 3]")
     
-    def test_execute_list_assignment_with_expression(self):
+    def test_execute_list_assignment_with_expression(self) -> None:
         """Test executing list assignment with expression."""
         code = code_block("""
             let nums list of integer = [1, 2, 3]
@@ -1194,7 +1194,7 @@ class TestEvaluator(unittest.TestCase):
             self.assertEqual(results, [20, 2, 3])
             self.assertEqual(captured_output.getvalue().strip(), "[20, 2, 3]")
     
-    def test_execute_list_with_expressions(self):
+    def test_execute_list_with_expressions(self) -> None:
         """Test executing list with expression elements."""
         code = code_block("""
             let x integer = 10
@@ -1212,7 +1212,7 @@ class TestEvaluator(unittest.TestCase):
             self.assertEqual(results, [11, 40, 99])
             self.assertEqual(captured_output.getvalue().strip(), "[11, 40, 99]")
     
-    def test_execute_complex_list_operations(self):
+    def test_execute_complex_list_operations(self) -> None:
         """Test executing complex list operations."""
         code = code_block("""
             let nums list of integer = [1, 2, 3]
@@ -1231,7 +1231,7 @@ class TestEvaluator(unittest.TestCase):
             self.assertEqual(results, [3, 13, 13, 2, 3])
             self.assertEqual(captured_output.getvalue().strip(), "3\n13\n[13, 2, 3]")
     
-    def test_execute_list_in_function(self):
+    def test_execute_list_in_function(self) -> None:
         """Test executing list operations in function."""
         code = code_block("""
             def getfirst(nums list of integer) returns integer
@@ -1251,7 +1251,7 @@ class TestEvaluator(unittest.TestCase):
             self.assertEqual(results, [100])
             self.assertEqual(captured_output.getvalue().strip(), "100")
     
-    def test_execute_function_returning_list(self):
+    def test_execute_function_returning_list(self) -> None:
         """Test executing function that returns a list."""
         code = code_block("""
             def makelist() returns list of integer
@@ -1271,7 +1271,7 @@ class TestEvaluator(unittest.TestCase):
             self.assertEqual(captured_output.getvalue().strip(), "[1, 2, 3]")
     
     # List error tests
-    def test_execute_list_access_out_of_bounds_positive(self):
+    def test_execute_list_access_out_of_bounds_positive(self) -> None:
         """Test list access out of bounds (positive index)."""
         code = code_block("""
             let nums list of integer = [1, 2, 3]
@@ -1286,7 +1286,7 @@ class TestEvaluator(unittest.TestCase):
             execute(ast)
         self.assertIn("out of bounds", str(cm.exception).lower())
     
-    def test_execute_list_access_out_of_bounds_negative(self):
+    def test_execute_list_access_out_of_bounds_negative(self) -> None:
         """Test list access out of bounds (negative index)."""
         code = code_block("""
             let nums list of integer = [1, 2, 3]
@@ -1302,7 +1302,7 @@ class TestEvaluator(unittest.TestCase):
             execute(ast)
         self.assertIn("out of bounds", str(cm.exception).lower())
     
-    def test_execute_list_assignment_out_of_bounds(self):
+    def test_execute_list_assignment_out_of_bounds(self) -> None:
         """Test list assignment out of bounds."""
         code = code_block("""
             let nums list of integer = [1, 2, 3]
@@ -1317,7 +1317,7 @@ class TestEvaluator(unittest.TestCase):
             execute(ast)
         self.assertIn("out of bounds", str(cm.exception).lower())
     
-    def test_execute_repeat_negative_count(self):
+    def test_execute_repeat_negative_count(self) -> None:
         """Test repeat with negative count."""
         code = code_block("""
             let negcount integer = 0 - 5
@@ -1333,37 +1333,37 @@ class TestEvaluator(unittest.TestCase):
         self.assertIn("negative", str(cm.exception).lower())
     
     # Negative number evaluation tests
-    def test_evaluate_negative_integer_literal(self):
+    def test_evaluate_negative_integer_literal(self) -> None:
         """Test evaluating negative integer literals."""
         env = Environment.empty()
         expr = IntegerLiteral(-42)
         result = evaluate_expression(env, expr)
         self.assertEqual(result, -42)
     
-    def test_evaluate_negative_zero_integer(self):
+    def test_evaluate_negative_zero_integer(self) -> None:
         """Test evaluating negative zero integer."""
         env = Environment.empty()
         expr = IntegerLiteral(-0)
         result = evaluate_expression(env, expr)
         self.assertEqual(result, 0)
     
-    def test_evaluate_negative_float_literal(self):
+    def test_evaluate_negative_float_literal(self) -> None:
         """Test evaluating negative float literals."""
         env = Environment.empty()
         expr = FloatLiteral(-3.14)
         result = evaluate_expression(env, expr)
         self.assertEqual(result, -3.14)
     
-    def test_evaluate_negative_float_zero(self):
+    def test_evaluate_negative_float_zero(self) -> None:
         """Test evaluating negative float zero."""
         env = Environment.empty()
         expr = FloatLiteral(-0.0)
         result = evaluate_expression(env, expr)
         self.assertEqual(result, -0.0)
     
-    def test_execute_negative_integer_let(self):
+    def test_execute_negative_integer_let(self) -> None:
         """Test executing let statement with negative integer."""
-        ast = [
+        ast: list[Statement] = [
             Let("x", Type.INTEGER, IntegerLiteral(-42)),
             Print(Variable("x"))
         ]
@@ -1373,9 +1373,9 @@ class TestEvaluator(unittest.TestCase):
             self.assertEqual(results, [-42])
             self.assertEqual(captured_output.getvalue().strip(), "-42")
     
-    def test_execute_negative_float_let(self):
+    def test_execute_negative_float_let(self) -> None:
         """Test executing let statement with negative float."""
-        ast = [
+        ast: list[Statement] = [
             Let("pi", Type.FLOAT, FloatLiteral(-3.14)),
             Print(Variable("pi"))
         ]
@@ -1385,9 +1385,9 @@ class TestEvaluator(unittest.TestCase):
             self.assertEqual(results, [-3.14])
             self.assertEqual(captured_output.getvalue().strip(), "-3.14")
     
-    def test_execute_negative_arithmetic(self):
+    def test_execute_negative_arithmetic(self) -> None:
         """Test executing arithmetic with negative numbers."""
-        ast = [
+        ast: list[Statement] = [
             Let("result", Type.INTEGER, BinaryExpression(IntegerLiteral(-5), BinaryOperator.ADDITION, IntegerLiteral(3))),
             Print(Variable("result"))
         ]
@@ -1397,9 +1397,9 @@ class TestEvaluator(unittest.TestCase):
             self.assertEqual(results, [-2])
             self.assertEqual(captured_output.getvalue().strip(), "-2")
     
-    def test_execute_mixed_negative_positive_arithmetic(self):
+    def test_execute_mixed_negative_positive_arithmetic(self) -> None:
         """Test executing arithmetic with both negative and positive numbers."""
-        ast = [
+        ast: list[Statement] = [
             Let("result", Type.INTEGER, BinaryExpression(
                 BinaryExpression(IntegerLiteral(-10), BinaryOperator.ADDITION, IntegerLiteral(5)),
                 BinaryOperator.SUBTRACTION, IntegerLiteral(2))),
@@ -1411,9 +1411,9 @@ class TestEvaluator(unittest.TestCase):
             self.assertEqual(results, [-7])  # -10 + 5 - 2 = -7
             self.assertEqual(captured_output.getvalue().strip(), "-7")
     
-    def test_execute_negative_float_arithmetic(self):
+    def test_execute_negative_float_arithmetic(self) -> None:
         """Test executing arithmetic with negative floats."""
-        ast = [
+        ast: list[Statement] = [
             Let("result", Type.FLOAT, BinaryExpression(FloatLiteral(-2.5), BinaryOperator.MULTIPLICATION, FloatLiteral(4.0))),
             Print(Variable("result"))
         ]
@@ -1423,9 +1423,9 @@ class TestEvaluator(unittest.TestCase):
             self.assertEqual(results, [-10.0])
             self.assertEqual(captured_output.getvalue().strip(), "-10.0")
     
-    def test_execute_negative_comparison(self):
+    def test_execute_negative_comparison(self) -> None:
         """Test executing comparison with negative numbers."""
-        ast = [
+        ast: list[Statement] = [
             Let("result", Type.BOOLEAN, BinaryExpression(IntegerLiteral(-5), BinaryOperator.LESS_THAN, IntegerLiteral(0))),
             Print(Variable("result"))
         ]
@@ -1435,7 +1435,7 @@ class TestEvaluator(unittest.TestCase):
             self.assertEqual(results, [True])
             self.assertEqual(captured_output.getvalue().strip(), "true")
     
-    def test_execute_negative_in_list(self):
+    def test_execute_negative_in_list(self) -> None:
         """Test executing list operations with negative numbers."""
         code = code_block("""
             let nums list of integer = [-1, -2, -3]
@@ -1452,7 +1452,7 @@ class TestEvaluator(unittest.TestCase):
             self.assertEqual(results, [-1, -2, -3, -1])
             self.assertEqual(captured_output.getvalue().strip(), "[-1, -2, -3]\n-1")
     
-    def test_execute_negative_in_function_call(self):
+    def test_execute_negative_in_function_call(self) -> None:
         """Test executing function calls with negative arguments."""
         code = code_block("""
             def add(x integer, y integer) returns integer
@@ -1470,7 +1470,7 @@ class TestEvaluator(unittest.TestCase):
             self.assertEqual(results, [5])
             self.assertEqual(captured_output.getvalue().strip(), "5")
     
-    def test_execute_complex_negative_program(self):
+    def test_execute_complex_negative_program(self) -> None:
         """Test executing a complex program with negative numbers."""
         code = code_block("""
             let temp integer = -10
