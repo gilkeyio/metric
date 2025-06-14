@@ -390,7 +390,7 @@ def execute(ast: AbstractSyntaxTree) -> Tuple[List[RuntimeValue], int]:
     env = Environment.empty()
     results: List[RuntimeValue] = []
 
-    def collect(stmt_res: Optional[RuntimeValue | List[RuntimeValue]]):
+    def collect(stmt_res: Optional[Union[RuntimeValue, List[RuntimeValue]]]):
         if isinstance(stmt_res, list):
             results.extend(stmt_res)
         elif stmt_res is not None:
