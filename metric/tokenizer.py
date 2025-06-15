@@ -75,56 +75,126 @@ class TokenizerError(Exception):
 TokenType = Token | IntegerToken | FloatToken | IdentifierToken
 
 
+# Indentation configuration constants
+INDENT_SIZE = 4
+BASE_INDENT_LEVEL = 0
+
+
+def _extract_indentation_info(line: str) -> tuple[int, str]:
+    """Extract indentation level and content from a line."""
+    leading_spaces = 0
+    for char in line:
+        if char == ' ':
+            leading_spaces += 1
+        else:
+            break
+    
+    return leading_spaces, line.strip()
+
+
+def _validate_indentation_increment(spaces: int, line_num: int) -> int:
+    """Validate and convert space count to indentation depth."""
+    if spaces > 0 and spaces % INDENT_SIZE != 0:
+        raise TokenizerError(f"Invalid indentation: expected multiples of {INDENT_SIZE} spaces at line {line_num}")
+    
+    return spaces // INDENT_SIZE
+
+
+def _handle_dedentation(target_depth: int, indent_stack: list[int], line_num: int) -> list[TokenType]:
+    """Handle dedentation to target depth with validation."""
+    dedent_tokens: list[TokenType] = []
+    
+    while len(indent_stack) > 1 and indent_stack[-1] > target_depth:
+        indent_stack.pop()
+        dedent_tokens.append(Token.DEDENT)
+    
+    # Validate we landed on a valid indentation level
+    if indent_stack[-1] != target_depth:
+        expected_spaces = indent_stack[-1] * INDENT_SIZE
+        raise TokenizerError(f"Invalid indentation: expected {expected_spaces} spaces at line {line_num}")
+    
+    return dedent_tokens
+
+
+def _handle_indentation_change(indent_depth: int, indent_stack: list[int], line_num: int) -> list[TokenType]:
+    """Handle indentation changes using comprehensive pattern matching."""
+    current_depth = indent_stack[-1]
+    
+    if indent_depth == current_depth:
+        return []
+    elif indent_depth == current_depth + 1:
+        indent_stack.append(indent_depth)
+        return [Token.INDENT]
+    elif indent_depth > current_depth + 1:
+        expected_spaces = (current_depth + 1) * INDENT_SIZE
+        raise TokenizerError(f"Invalid indentation: expected {expected_spaces} spaces at line {line_num}")
+    else:  # indent_depth < current_depth
+        return _handle_dedentation(indent_depth, indent_stack, line_num)
+
+
+def _has_more_content_after(line_num: int, lines: list[str]) -> bool:
+    """Check if there are more non-empty lines after the current line."""
+    if line_num >= len(lines):
+        return False
+    
+    # Check if there are any non-empty lines remaining
+    for i in range(line_num, len(lines)):
+        if lines[i].strip():
+            return True
+    return False
+
+
+def _finalize_all_indentation(indent_stack: list[int]) -> list[TokenType]:
+    """Generate final DEDENT tokens to close all remaining indentation levels."""
+    final_tokens: list[TokenType] = []
+    while len(indent_stack) > 1:
+        indent_stack.pop()
+        final_tokens.append(Token.DEDENT)
+    return final_tokens
+
+
 def tokenize(input_str: str) -> list[TokenType]:
-    """Tokenize input string into list of tokens with indentation handling."""
+    """Tokenize input string into list of tokens with indentation handling.
+    
+    Args:
+        input_str: The source code string to tokenize
+        
+    Returns:
+        List of tokens representing the parsed input
+        
+    Raises:
+        TokenizerError: For invalid syntax, indentation, or characters
+    """
+    if not input_str.strip():
+        return []
+    
     lines = input_str.split('\n')
     tokens: list[TokenType] = []
-    indent_stack = [0]  # Stack to track indentation levels
+    indent_stack = [BASE_INDENT_LEVEL]  # Stack to track indentation levels
     
     for line_num, line in enumerate(lines, 1):
         if not line.strip():  # Skip empty lines
             continue
-            
-        # Calculate indentation
-        indent_level = 0
-        for char in line:
-            if char == ' ':
-                indent_level += 1
-            else:
-                break
         
-        # Validate indentation (must be multiple of 4, unless it's 0)
-        if indent_level > 0 and indent_level % 4 != 0:
-            raise TokenizerError(f"Invalid indentation: expected 4 spaces at line {line_num}")
-        
-        indent_depth = indent_level // 4
+        # Process indentation
+        leading_spaces, line_content = _extract_indentation_info(line)
+        indent_depth = _validate_indentation_increment(leading_spaces, line_num)
         
         # Handle indentation changes
-        if indent_depth > indent_stack[-1]:
-            if indent_depth != indent_stack[-1] + 1:
-                raise TokenizerError(f"Invalid indentation: expected {(indent_stack[-1] + 1) * 4} spaces at line {line_num}")
-            indent_stack.append(indent_depth)
-            tokens.append(Token.INDENT)
-        elif indent_depth < indent_stack[-1]:
-            while len(indent_stack) > 1 and indent_stack[-1] > indent_depth:
-                indent_stack.pop()
-                tokens.append(Token.DEDENT)
-            if indent_stack[-1] != indent_depth:
-                raise TokenizerError(f"Invalid indentation: expected {indent_stack[-1] * 4} spaces at line {line_num}")
+        indentation_tokens = _handle_indentation_change(indent_depth, indent_stack, line_num)
+        tokens.extend(indentation_tokens)
         
-        # Tokenize the content of the line
-        line_content = line.strip()
+        # Process line content
         line_tokens = tokenize_line(line_content, line_num)
         tokens.extend(line_tokens)
         
-        # Add statement separator if not the last line and there are more non-empty lines
-        if line_num < len(lines) and any(l.strip() for l in lines[line_num:]):
+        # Add statement separator if needed
+        if _has_more_content_after(line_num, lines):
             tokens.append(Token.STATEMENT_SEPARATOR)
     
-    # Add any remaining DEDENT tokens
-    while len(indent_stack) > 1:
-        indent_stack.pop()
-        tokens.append(Token.DEDENT)
+    # Clean up remaining indentation
+    final_tokens = _finalize_all_indentation(indent_stack)
+    tokens.extend(final_tokens)
     
     return tokens
 
