@@ -2,9 +2,11 @@
 """Main entry point for the Metric language interpreter."""
 
 from typing import Generator
-from . import tokenize, parse, execute, TokenizerError, ParseError, EvaluationError
-from .type_checker import type_check, TypeCheckError
-from .style_validator import validate_style, StyleError
+
+from metric.errors import CompilerError, handle_compiler_error
+from . import tokenize, parse, execute
+from .type_checker import type_check
+from .style_validator import validate_style
 import sys
 import argparse
 import os
@@ -31,21 +33,8 @@ def run_program(program_text: str) -> None:
 
         print(f"Operation count: {operation_count}")
 
-    except TokenizerError as e:
-        print(f"\033[31mTokenizer Error: {e}\033[0m", file=sys.stderr)
-        sys.exit(1)
-    except StyleError as e:
-        print(f"\033[31mStyle Error: {e}\033[0m", file=sys.stderr)
-        sys.exit(1)
-    except ParseError as e:
-        print(f"\033[31mParse Error: {e}\033[0m", file=sys.stderr)
-        sys.exit(1)
-    except TypeCheckError as e:
-        print(f"\033[31mType Error: {e}\033[0m", file=sys.stderr)
-        sys.exit(1)
-    except EvaluationError as e:
-        print(f"\033[31mEvaluation Error: {e}\033[0m", file=sys.stderr)
-        sys.exit(1)
+    except CompilerError as error:
+        handle_compiler_error(error)
 
 
 def run_file(filepath: str) -> None:

@@ -1,7 +1,8 @@
 #!/usr/bin/env python3
 import unittest
 
-from metric.tokenizer import TokenType, tokenize, Token, IntegerToken, IdentifierToken, FloatToken, TokenizerError
+from metric.errors import TokenizerError
+from metric.tokenizer import TokenType, tokenize, Token, IntegerToken, IdentifierToken, FloatToken
 from test.test_utils import code_block
 
 
@@ -336,12 +337,12 @@ print y""")
     def test_tokenize_fails_with_incomplete_float(self)  -> None:
         with self.assertRaises(TokenizerError) as cm:
             tokenize("3.")
-        self.assertEqual(str(cm.exception), "Invalid float: missing digits after decimal point at line 1")
+        self.assertEqual(str(cm.exception), "[Line 1, Column 3] Tokenizer Error | Invalid float: missing digits after decimal point")
     
     def test_tokenize_fails_with_multiple_decimal_points(self)  -> None:
         with self.assertRaises(TokenizerError) as cm:
             tokenize("3.14.5")
-        self.assertEqual(str(cm.exception), "Unexpected character: . at line 1")
+        self.assertEqual(str(cm.exception), "[Line 1, Column 5] Tokenizer Error | Unexpected character: '.'")
     
     # Comment tokenization tests
     def test_tokenize_standalone_comment(self)  -> None:
@@ -671,7 +672,7 @@ print x""")
         """Test invalid indentation that jumps more than one level."""
         with self.assertRaises(TokenizerError) as context:
             tokenize("let x integer = 5\n        print x")  # 8 spaces instead of 4
-        self.assertIn("Invalid indentation: expected 4 spaces", str(context.exception))
+        self.assertEqual("[Line 2, Column 1] Tokenizer Error | Invalid indentation: expected 4 spaces", str(context.exception))
 
     def test_tokenize_invalid_dedentation_level(self) -> None:
         """Test invalid dedentation that doesn't match any previous level."""
@@ -683,25 +684,25 @@ print x""")
         """)
         with self.assertRaises(TokenizerError) as context:
             tokenize(code)
-        self.assertIn("Invalid indentation: expected", str(context.exception))
+        self.assertEqual("[Line 4, Column 1] Tokenizer Error | Invalid indentation: expected multiples of 4 spaces", str(context.exception))
 
     def test_tokenize_invalid_negative_float_missing_digits(self) -> None:
         """Test invalid negative float with missing digits after decimal point."""
         with self.assertRaises(TokenizerError) as context:
             tokenize("-3.")
-        self.assertIn("Invalid float: missing digits after decimal point", str(context.exception))
+        self.assertEqual("[Line 1, Column 4] Tokenizer Error | Invalid float: missing digits after decimal point", str(context.exception))
 
     def test_tokenize_unexpected_character_operator_context(self) -> None:
         """Test unexpected character in operator parsing context."""
         with self.assertRaises(TokenizerError) as context:
             tokenize("@")
-        self.assertIn("Unexpected character: @", str(context.exception))
+        self.assertEqual("[Line 1, Column 1] Tokenizer Error | Unexpected character: '@'", str(context.exception))
 
     def test_tokenize_tab_character_error(self) -> None:
         """Test that tab characters raise an error."""
         with self.assertRaises(TokenizerError) as context:
             tokenize("let x\tinteger = 5")
-        self.assertIn("Unexpected character: \\t", str(context.exception))
+        self.assertEqual("[Line 1, Column 6] Tokenizer Error | Unexpected character: '\\t'", str(context.exception))
 
     def test_tokenize_empty_line_handling(self) -> None:
         """Test tokenizing code with empty lines between statements."""
@@ -717,7 +718,7 @@ print x""")
         for char in unexpected_chars:
             with self.assertRaises(TokenizerError) as context:
                 tokenize(char)
-            self.assertIn(f"Unexpected character: {char}", str(context.exception))
+            self.assertEqual(f"[Line 1, Column 1] Tokenizer Error | Unexpected character: '{char}'", str(context.exception))
 
 
 if __name__ == '__main__':

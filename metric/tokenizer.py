@@ -1,6 +1,8 @@
 from enum import Enum
 from dataclasses import dataclass
 
+from metric.errors import TokenizerError
+
 class Token(Enum):
     INTEGER = "Integer"
     IDENTIFIER = "Identifier"
@@ -51,26 +53,13 @@ class Token(Enum):
 class IntegerToken:
     value: int
 
-
 @dataclass
 class FloatToken:
     value: float
 
-
 @dataclass
 class IdentifierToken:
     name: str
-
-
-@dataclass
-class Position:
-    line: int
-    column: int
-
-
-class TokenizerError(Exception):
-    pass
-
 
 TokenType = Token | IntegerToken | FloatToken | IdentifierToken
 
@@ -79,23 +68,20 @@ TokenType = Token | IntegerToken | FloatToken | IdentifierToken
 INDENT_SIZE = 4
 BASE_INDENT_LEVEL = 0
 
-
 def _extract_indentation_info(line: str) -> tuple[int, str]:
     """Extract indentation level and content from a line."""
-    leading_spaces = 0
-    for char in line:
-        if char == ' ':
-            leading_spaces += 1
-        else:
-            break
-    
-    return leading_spaces, line.strip()
+    stripped = line.lstrip(" ")
+    return len(line) - len(stripped), line.strip()
 
 
 def _validate_indentation_increment(spaces: int, line_num: int) -> int:
     """Validate and convert space count to indentation depth."""
     if spaces > 0 and spaces % INDENT_SIZE != 0:
-        raise TokenizerError(f"Invalid indentation: expected multiples of {INDENT_SIZE} spaces at line {line_num}")
+        raise TokenizerError(
+            f"Invalid indentation: expected multiples of {INDENT_SIZE} spaces",
+            line=line_num,
+            column=1
+        )
     
     return spaces // INDENT_SIZE
 
@@ -126,7 +112,12 @@ def _handle_indentation_change(indent_depth: int, indent_stack: list[int], line_
         return [Token.INDENT]
     elif indent_depth > current_depth + 1:
         expected_spaces = (current_depth + 1) * INDENT_SIZE
-        raise TokenizerError(f"Invalid indentation: expected {expected_spaces} spaces at line {line_num}")
+        raise TokenizerError(
+            f"Invalid indentation: expected {expected_spaces} spaces",
+            line=line_num,
+            column=1
+        )
+
     else:  # indent_depth < current_depth
         return _handle_dedentation(indent_depth, indent_stack)
 
@@ -184,7 +175,7 @@ def tokenize(input_str: str) -> list[TokenType]:
         tokens.extend(indentation_tokens)
         
         # Process line content
-        line_tokens = tokenize_line(line_content, line_num)
+        line_tokens = _tokenize_line(line_content, line_num)
         tokens.extend(line_tokens)
         
         # Add statement separator if needed
@@ -197,7 +188,7 @@ def tokenize(input_str: str) -> list[TokenType]:
     
     return tokens
 
-def tokenize_line(line_content: str, line_num: int) -> list[TokenType]:
+def _tokenize_line(line_content: str, line_num: int) -> list[TokenType]:
     """Tokenize a single line of content."""
     assert line_content, "line_content should not be empty"
     
@@ -208,14 +199,14 @@ def tokenize_line(line_content: str, line_num: int) -> list[TokenType]:
         code_part = line_content[:comment_pos].rstrip()
         tokens: list[TokenType] = []
         if code_part:
-            tokens = tokenize_line_without_comments(code_part, line_num)
+            tokens = _tokenize_line_without_comments(code_part, line_num)
         
         # Add the comment token
         tokens.append(Token.COMMENT)
         return tokens
     
     # No comments, tokenize normally
-    return tokenize_line_without_comments(line_content, line_num)
+    return _tokenize_line_without_comments(line_content, line_num)
 
 def _parse_number(line_content: str, start: int, line_num: int) -> tuple[TokenType, int]:
     """Parse a number (integer or float) starting at the given position.
@@ -239,7 +230,11 @@ def _parse_number(line_content: str, start: int, line_num: int) -> tuple[TokenTy
         
         # Check if we have digits after decimal point
         if i == decimal_start:
-            raise TokenizerError(f"Invalid float: missing digits after decimal point at line {line_num}")
+            raise TokenizerError(
+                "Invalid float: missing digits after decimal point",
+                line=line_num,
+                column=i+1
+            )
         
         number_str = line_content[start:i]
         return FloatToken(float(number_str)), i
@@ -308,7 +303,7 @@ def _is_negative_number_start(line_content: str, pos: int) -> bool:
             line_content[pos + 1].isdigit())
 
 
-def tokenize_line_without_comments(line_content: str, line_num: int) -> list[TokenType]:
+def _tokenize_line_without_comments(line_content: str, line_num: int) -> list[TokenType]:
     """Tokenize a single line of content without comments."""
     assert line_content, "line_content should not be empty"
     
@@ -396,9 +391,8 @@ def tokenize_line_without_comments(line_content: str, line_num: int) -> list[Tok
                 tokens.append(_get_keyword_token(identifier))
             
             case '\t':
-                raise TokenizerError(f"Unexpected character: \\t at line {line_num}")
+                raise TokenizerError("Unexpected character: '\\t'", line=line_num, column=i+1)
             
             case _:
-                raise TokenizerError(f"Unexpected character: {char} at line {line_num}")
-    
+                raise TokenizerError(f"Unexpected character: '{char}'", line=line_num, column=i+1)    
     return tokens
