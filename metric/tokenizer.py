@@ -295,7 +295,7 @@ def _get_keyword_token(identifier: str) -> TokenType:
             return IdentifierToken(identifier)
 
 
-def _lookahead_matches(line_content: str, pos: int, expected: str) -> bool:
+def _peek(line_content: str, pos: int, expected: str) -> bool:
     """Check if the string at pos matches the expected multi-character sequence."""
     return (pos + len(expected) <= len(line_content) and 
             line_content[pos:pos + len(expected)] == expected)
@@ -322,19 +322,19 @@ def tokenize_line_without_comments(line_content: str, line_num: int) -> list[Tok
             case ' ':
                 i += 1
             
-            case '=' if _lookahead_matches(line_content, i, '=='):
+            case '=' if _peek(line_content, i, '=='):
                 tokens.append(Token.EQUAL_EQUAL)
                 i += 2
             
-            case '!' if _lookahead_matches(line_content, i, '!='):
+            case '!' if _peek(line_content, i, '!='):
                 tokens.append(Token.NOT_EQUAL)
                 i += 2
             
-            case '<' if _lookahead_matches(line_content, i, '<='):
+            case '<' if _peek(line_content, i, '<='):
                 tokens.append(Token.LESS_THAN_OR_EQUAL)
                 i += 2
             
-            case '>' if _lookahead_matches(line_content, i, '>='):
+            case '>' if _peek(line_content, i, '>='):
                 tokens.append(Token.GREATER_THAN_OR_EQUAL)
                 i += 2
             
