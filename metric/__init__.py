@@ -1,6 +1,7 @@
 """Metric programming language implementation."""
 
-from .tokenizer import tokenize, TokenizerError
+from .tokenizer import tokenize
+from .errors import TokenizerError
 from .parser import parse, ParseError
 from .evaluator import execute, EvaluationError
 from .type_checker import type_check, TypeCheckError
