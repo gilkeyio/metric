@@ -100,7 +100,7 @@ def _validate_indentation_increment(spaces: int, line_num: int) -> int:
     return spaces // INDENT_SIZE
 
 
-def _handle_dedentation(target_depth: int, indent_stack: list[int], line_num: int) -> list[TokenType]:
+def _handle_dedentation(target_depth: int, indent_stack: list[int]) -> list[TokenType]:
     """Handle dedentation to target depth with validation."""
     dedent_tokens: list[TokenType] = []
     
@@ -108,10 +108,9 @@ def _handle_dedentation(target_depth: int, indent_stack: list[int], line_num: in
         indent_stack.pop()
         dedent_tokens.append(Token.DEDENT)
     
-    # Validate we landed on a valid indentation level
-    if indent_stack[-1] != target_depth:
-        expected_spaces = indent_stack[-1] * INDENT_SIZE
-        raise TokenizerError(f"Invalid indentation: expected {expected_spaces} spaces at line {line_num}")
+    # Assert we landed on a valid indentation level - this should never fail
+    # if the indentation logic is working correctly
+    assert indent_stack[-1] == target_depth, f"Indentation logic error: expected to land on level {target_depth}, but landed on {indent_stack[-1]}"
     
     return dedent_tokens
 
@@ -129,7 +128,7 @@ def _handle_indentation_change(indent_depth: int, indent_stack: list[int], line_
         expected_spaces = (current_depth + 1) * INDENT_SIZE
         raise TokenizerError(f"Invalid indentation: expected {expected_spaces} spaces at line {line_num}")
     else:  # indent_depth < current_depth
-        return _handle_dedentation(indent_depth, indent_stack, line_num)
+        return _handle_dedentation(indent_depth, indent_stack)
 
 
 def _has_more_content_after(line_num: int, lines: list[str]) -> bool:
