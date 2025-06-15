@@ -2,6 +2,11 @@
 
 This is a Python implementation of the Metric programming language - a simple statically-typed language for deterministic algorithm performance testing. It has explicit type annotations, variable assignment, arithmetic expressions, boolean literals, comparison operations, and control flow statements. The language enforces strict whitespace rules and provides compile-time type safety.
 
+![Python](https://img.shields.io/badge/python-3.13-blue.svg)
+![License](https://img.shields.io/github/license/gilkeyio/metric)
+![Issues](https://img.shields.io/github/issues/gilkeyio/metric)
+![Tests](https://github.com/gilkeyio/metric/workflows/Tests/badge.svg)
+
 ## Project Structure
 
 ```
