@@ -6,6 +6,8 @@ This is a Python implementation of the Metric programming language - a simple st
 ![License](https://img.shields.io/github/license/gilkeyio/metric)
 ![Issues](https://img.shields.io/github/issues/gilkeyio/metric)
 ![Tests](https://github.com/gilkeyio/metric/workflows/Tests/badge.svg)
+[![Coverage](https://gilkeyio.github.io/metric/badges/coverage.svg)](https://github.com/gilkeyio/metric/actions)
+
 
 ## Project Structure
 
