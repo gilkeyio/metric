@@ -4,6 +4,7 @@ print nums[0]
 print nums[4]
 
 let zeros list of integer = repeat(0, 3)
+
 print zeros
 
 set nums[2] = 99
