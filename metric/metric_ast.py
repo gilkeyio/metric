@@ -28,7 +28,7 @@ class BinaryOperator(Enum):
     GREATER_THAN = "GreaterThan"
     LESS_THAN_OR_EQUAL = "LessThanOrEqual"
     GREATER_THAN_OR_EQUAL = "GreaterThanOrEqual"
-    EQUAL_EQUAL = "EqualEqual"
+    IDENTICAL_TO = "IdenticalTo"
     NOT_EQUAL = "NotEqual"
     AND = "And"
     OR = "Or"

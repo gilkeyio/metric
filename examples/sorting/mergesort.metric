@@ -1,7 +1,7 @@
 def intdiv(a integer, b integer) returns integer
     let result integer = 0
     let current integer = a
-    while current >= b
+    while current ≥ b
         set current = current - b
         set result = result + 1
     return result
@@ -23,7 +23,7 @@ def merge(left list of integer, right list of integer) returns list of integer
     let k integer = 0
     let chooseleft boolean = false
     while i < len(left) and j < len(right)
-        set chooseleft = left[i] <= right[j]
+        set chooseleft = left[i] ≤ right[j]
         if chooseleft
             set out[k] = left[i]
             set i = i + 1
@@ -42,7 +42,7 @@ def merge(left list of integer, right list of integer) returns list of integer
     return out
 
 def mergesort(arr list of integer) returns list of integer
-    if len(arr) <= 1
+    if len(arr) ≤ 1
         return arr
     let mid integer = intdiv(len(arr), 2)
     let left list of integer = copyslice(arr, 0, mid)

@@ -5,7 +5,7 @@ def multiply(a integer, b integer) returns integer
     return a * b
 
 def factorial(n integer) returns integer
-    if n <= 1
+    if n ≤ 1
         return 1
     return n * factorial(n - 1)
 
@@ -23,7 +23,7 @@ print combined
 
 # Functions with logical operators
 def isEven(n integer) returns boolean
-    return n % 2 == 0
+    return n % 2 ≡ 0
 
 def isPositive(n integer) returns boolean
     return n > 0
@@ -32,7 +32,7 @@ def isEvenAndPositive(n integer) returns boolean
     return isEven(n) and isPositive(n)
 
 def isValidScore(score integer) returns boolean
-    return score >= 0 and score <= 100
+    return score ≥ 0 and score ≤ 100
 
 let num integer = 8
 print isEven(num)

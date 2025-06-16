@@ -252,13 +252,13 @@ class TestEvaluator(unittest.TestCase):
     
     def test_evaluate_equal_equal_true(self) -> None:
         env = Environment.empty()
-        expr = BinaryExpression(IntegerLiteral(5), BinaryOperator.EQUAL_EQUAL, IntegerLiteral(5))
+        expr = BinaryExpression(IntegerLiteral(5), BinaryOperator.IDENTICAL_TO, IntegerLiteral(5))
         result = evaluate_expression(env, expr)
         self.assertEqual(result, True)
     
     def test_evaluate_equal_equal_false(self) -> None:
         env = Environment.empty()
-        expr = BinaryExpression(IntegerLiteral(5), BinaryOperator.EQUAL_EQUAL, IntegerLiteral(3))
+        expr = BinaryExpression(IntegerLiteral(5), BinaryOperator.IDENTICAL_TO, IntegerLiteral(3))
         result = evaluate_expression(env, expr)
         self.assertEqual(result, False)
     
@@ -741,7 +741,7 @@ class TestEvaluator(unittest.TestCase):
         ast: list[Statement] = [
             Let("done", Type.BOOLEAN, BooleanLiteral(False)),
             Let("count", Type.INTEGER, IntegerLiteral(0)),
-            While(BinaryExpression(Variable("done"), BinaryOperator.EQUAL_EQUAL, BooleanLiteral(False)), [
+            While(BinaryExpression(Variable("done"), BinaryOperator.IDENTICAL_TO, BooleanLiteral(False)), [
                 Set("count", BinaryExpression(Variable("count"), BinaryOperator.ADDITION, IntegerLiteral(1))),
                 Print(Variable("count")),
                 Set("done", BinaryExpression(Variable("count"), BinaryOperator.GREATER_THAN_OR_EQUAL, IntegerLiteral(3)))

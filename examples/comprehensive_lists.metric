@@ -9,7 +9,7 @@ def sumlist(nums list of integer) returns integer
 def contains(nums list of integer, target integer) returns boolean
     let i integer = 0
     while i < len(nums)
-        if nums[i] == target
+        if nums[i] ≡ target
             return true
         set i = i + 1
     return false

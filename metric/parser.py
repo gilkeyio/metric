@@ -184,7 +184,7 @@ def parse_comparison_expression(tokens: list[TokenType]) -> tuple[Expression, li
         Token.GREATER_THAN: BinaryOperator.GREATER_THAN,
         Token.LESS_THAN_OR_EQUAL: BinaryOperator.LESS_THAN_OR_EQUAL,
         Token.GREATER_THAN_OR_EQUAL: BinaryOperator.GREATER_THAN_OR_EQUAL,
-        Token.EQUAL_EQUAL: BinaryOperator.EQUAL_EQUAL,
+        Token.IDENTICAL_TO: BinaryOperator.IDENTICAL_TO,
         Token.NOT_EQUAL: BinaryOperator.NOT_EQUAL
     }
     
@@ -265,7 +265,7 @@ def _parse_let_statement(tokens: list[TokenType]) -> tuple[Statement, list[Token
     # Parse type (could be list type)
     type_annotation, remaining_after_type = _parse_type(tokens[2:])
     
-    if not remaining_after_type or remaining_after_type[0] != Token.EQUALS:
+    if not remaining_after_type or remaining_after_type[0] != Token.ASSIGN:
         raise ParseError("Expected '=' after type annotation")
     
     expr, remaining = parse_expression(remaining_after_type[1:])
@@ -299,7 +299,7 @@ def _parse_set_statement(tokens: list[TokenType]) -> tuple[Statement, list[Token
         remaining = remaining[1:]
         
         # Expect equals
-        if not remaining or remaining[0] != Token.EQUALS:
+        if not remaining or remaining[0] != Token.ASSIGN:
             raise ParseError("Expected '=' after list index")
         remaining = remaining[1:]
         
@@ -309,7 +309,7 @@ def _parse_set_statement(tokens: list[TokenType]) -> tuple[Statement, list[Token
         return ListAssignment(name, index_expr, value_expr), remaining
     
     # Regular variable assignment: set var = value
-    elif remaining and remaining[0] == Token.EQUALS:
+    elif remaining and remaining[0] == Token.ASSIGN:
         remaining = remaining[1:]  # consume '='
         value_expr, remaining = parse_expression(remaining)
         return Set(name, value_expr), remaining

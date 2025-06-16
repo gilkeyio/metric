@@ -21,7 +21,7 @@ def selectionsort(arr list of integer) returns list of integer
             if out[j] < out[minindex]
                 set minindex = j
             set j = j + 1
-        if minindex != i
+        if minindex ≠ i
             set temp = out[i]
             set out[i] = out[minindex]
             set out[minindex] = temp

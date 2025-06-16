@@ -111,7 +111,7 @@ class TestListFeatures(unittest.TestCase):
             let nums list of integer = [5, 10, 15]
             if len(nums) > 2
                 print nums[0]
-                if nums[1] == 10
+                if nums[1] ≡ 10
                     set nums[1] = 100
                     print nums[1]
             print nums
@@ -281,7 +281,7 @@ class TestListFeatures(unittest.TestCase):
             def contains(nums list of integer, target integer) returns boolean
                 let i integer = 0
                 while i < len(nums)
-                    if nums[i] == target
+                    if nums[i] ≡ target
                         return true
                     set i = i + 1
                 return false

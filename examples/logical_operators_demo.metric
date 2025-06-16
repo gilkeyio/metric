@@ -37,14 +37,14 @@ let hasJob boolean = true
 let hasLicense boolean = true
 let income integer = 50000
 
-let canGetLoan boolean = age >= 18 and hasJob and income > 30000
+let canGetLoan boolean = age ≥ 18 and hasJob and income > 30000
 print canGetLoan
 
 let needsTransport boolean = hasJob or age > 16
 print needsTransport
 
 # Using logical operators in control flow
-if age >= 18 and hasLicense
+if age ≥ 18 and hasLicense
     print 999
 
 if hasJob and income > 40000
@@ -58,12 +58,12 @@ if scoreOne > 80 and scoreTwo > 90
 # Logical operators with comparison chains
 let temp integer = 75
 let humidity integer = 60
-let isComfortable boolean = temp >= 70 and temp <= 80 and humidity < 70
+let isComfortable boolean = temp ≥ 70 and temp ≤ 80 and humidity < 70
 print isComfortable
 
 # Functions returning booleans for logical operations
 def isAdult(ageValue integer) returns boolean
-    return ageValue >= 18
+    return ageValue ≥ 18
 
 def hasHighIncome(incomeValue integer) returns boolean
     return incomeValue > 50000

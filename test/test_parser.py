@@ -197,7 +197,7 @@ class TestParser(unittest.TestCase):
     
     def test_parse_trailing_statement_separator(self)  -> None:
         # Using tokens directly for this edge case  
-        tokens: list[TokenType] =[Token.LET, IdentifierToken("x"), Token.INTEGER_TYPE, Token.EQUALS, IntegerToken(1), Token.STATEMENT_SEPARATOR]
+        tokens: list[TokenType] =[Token.LET, IdentifierToken("x"), Token.INTEGER_TYPE, Token.ASSIGN, IntegerToken(1), Token.STATEMENT_SEPARATOR]
         ast = parse(tokens)
         expected: list[Statement] = [Let("x", Type.INTEGER, IntegerLiteral(1))]
         self.assertEqual(ast, expected)
@@ -215,7 +215,7 @@ class TestParser(unittest.TestCase):
         self.assertEqual(str(cm.exception), "Expected 'let', 'print', 'if', 'while', 'set', 'def', 'return', or comment statement")
     
     def test_parse_error_let_missing_identifier(self)  -> None:
-        tokens: list[TokenType] =[Token.LET, Token.EQUALS, IntegerToken(5)]
+        tokens: list[TokenType] =[Token.LET, Token.ASSIGN, IntegerToken(5)]
         with self.assertRaises(ParseError) as cm:
             parse(tokens)
         self.assertEqual(str(cm.exception), "Expected 'let identifier type = expression'")
@@ -227,13 +227,13 @@ class TestParser(unittest.TestCase):
         self.assertEqual(str(cm.exception), "Expected 'let identifier type = expression'")
     
     def test_parse_error_unmatched_parenthesis(self)  -> None:
-        tokens: list[TokenType] =[Token.LET, IdentifierToken("x"), Token.INTEGER_TYPE, Token.EQUALS, Token.LEFT_PARENTHESIS, IntegerToken(5)]
+        tokens: list[TokenType] =[Token.LET, IdentifierToken("x"), Token.INTEGER_TYPE, Token.ASSIGN, Token.LEFT_PARENTHESIS, IntegerToken(5)]
         with self.assertRaises(ParseError) as cm:
             parse(tokens)
         self.assertEqual(str(cm.exception), "Expected closing parenthesis")
     
     def test_parse_error_expression_invalid_token(self)  -> None:
-        tokens: list[TokenType] =[Token.LET, IdentifierToken("x"), Token.INTEGER_TYPE, Token.EQUALS, Token.PLUS]
+        tokens: list[TokenType] =[Token.LET, IdentifierToken("x"), Token.INTEGER_TYPE, Token.ASSIGN, Token.PLUS]
         with self.assertRaises(ParseError) as cm:
             parse(tokens)
         self.assertEqual(str(cm.exception), "Expected integer, float, identifier, boolean, or opening parenthesis")
@@ -296,22 +296,22 @@ class TestParser(unittest.TestCase):
     def test_parse_less_than_or_equal(self)  -> None:
         expected: list[Statement] = [self._let_stmt("result", Type.BOOLEAN,
                     self._binary_expr(self._int_lit(5), BinaryOperator.LESS_THAN_OR_EQUAL, self._int_lit(10)))]
-        self._assert_parse_equals("let result boolean = 5 <= 10", expected)
+        self._assert_parse_equals("let result boolean = 5 ≤ 10", expected)
     
     def test_parse_greater_than_or_equal(self)  -> None:
         expected: list[Statement] = [self._let_stmt("result", Type.BOOLEAN,
                     self._binary_expr(self._int_lit(10), BinaryOperator.GREATER_THAN_OR_EQUAL, self._int_lit(5)))]
-        self._assert_parse_equals("let result boolean = 10 >= 5", expected)
+        self._assert_parse_equals("let result boolean = 10 ≥ 5", expected)
     
     def test_parse_equal_equal(self)  -> None:
         expected: list[Statement] = [self._let_stmt("result", Type.BOOLEAN,
-                    self._binary_expr(self._int_lit(5), BinaryOperator.EQUAL_EQUAL, self._int_lit(5)))]
-        self._assert_parse_equals("let result boolean = 5 == 5", expected)
+                    self._binary_expr(self._int_lit(5), BinaryOperator.IDENTICAL_TO, self._int_lit(5)))]
+        self._assert_parse_equals("let result boolean = 5 ≡ 5", expected)
     
     def test_parse_not_equal(self)  -> None:
         expected: list[Statement] = [self._let_stmt("result", Type.BOOLEAN,
                     self._binary_expr(self._int_lit(5), BinaryOperator.NOT_EQUAL, self._int_lit(3)))]
-        self._assert_parse_equals("let result boolean = 5 != 3", expected)
+        self._assert_parse_equals("let result boolean = 5 ≠ 3", expected)
     
     # Logical operator tests
     def test_parse_and_operator(self)  -> None:
@@ -548,7 +548,7 @@ class TestParser(unittest.TestCase):
             ]),
             self._print_stmt(self._var("done"))
         ]
-        self._assert_parse_equals("while counter <= 5\n    print counter\n    set counter = counter + 1\nprint done", expected)
+        self._assert_parse_equals("while counter ≤ 5\n    print counter\n    set counter = counter + 1\nprint done", expected)
     
     # Error cases for while statements
     def test_parse_error_while_missing_condition(self)  -> None:
@@ -565,7 +565,7 @@ class TestParser(unittest.TestCase):
     
     # Error cases for set statements
     def test_parse_error_set_missing_identifier(self)  -> None:
-        tokens: list[TokenType] =[Token.SET, Token.EQUALS, IntegerToken(5)]
+        tokens: list[TokenType] =[Token.SET, Token.ASSIGN, IntegerToken(5)]
         with self.assertRaises(ParseError) as cm:
             parse(tokens)
         self.assertEqual(str(cm.exception), "Expected 'set identifier = expression'")
