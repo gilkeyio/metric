@@ -6,12 +6,9 @@ post-tokenization, using both the original source code and tokenized output
 to enforce strict formatting rules.
 """
 
+from metric.errors import StyleError
 from .tokenizer import Token, IntegerToken, FloatToken, IdentifierToken
 
-
-class StyleError(Exception):
-    """Exception raised when style validation fails."""
-    pass
 
 
 def validate_style(source_code: str, tokens: list[Token | IntegerToken | FloatToken | IdentifierToken]) -> None:
@@ -40,8 +37,8 @@ def validate_style(source_code: str, tokens: list[Token | IntegerToken | FloatTo
     # Statement-level validation
     _validate_multiple_statements_per_line(source_code)
     
-    # Token-level validation using both source and tokens
-    _validate_token_spacing(source_code, tokens)
+    # Token-level validation using both source 
+    _validate_token_spacing(source_code)
     _validate_comment_spacing(source_code)
     _validate_comma_spacing(source_code)
 
@@ -49,7 +46,7 @@ def validate_style(source_code: str, tokens: list[Token | IntegerToken | FloatTo
 def _validate_not_empty(text: str) -> None:
     """Ensure program is not empty"""
     if not text.strip():
-        raise StyleError("Program must not be empty")
+        raise StyleError("Program must not be empty", line=1, column=1)
 
 
 def _validate_line_endings(text: str) -> None:
@@ -70,8 +67,9 @@ def _validate_line_endings(text: str) -> None:
             column_number = position + 1
 
         raise StyleError(
-            f"Carriage return newlines not allowed; use \\n only "
-            f"at line {line_number}, column {column_number}"
+            f"Carriage return newlines not allowed; use \\n only",
+            line=line_number,
+            column=column_number
         )
 
 
@@ -80,14 +78,17 @@ def _validate_leading_trailing_newlines(input_str: str) -> None:
     """Check for leading or trailing newlines which are not allowed."""
     if not input_str:
         return
-    
-    # Check for leading newlines
-    if input_str.startswith('\n'):
-        raise StyleError("Leading newlines not allowed")
-    
-    # Check for trailing newlines
+
+    # Leading newline at line 1, column 1
+    if input_str[0] == '\n':
+        raise StyleError("Leading newlines not allowed", line=1, column=1)
+
+    # Trailing newline: report its line (the empty line after the last '\n') at column 1
     if input_str.endswith('\n'):
-        raise StyleError("Trailing newlines not allowed")
+        # the trailing '\n' starts a new empty line
+        line_no = input_str.count('\n') + 1
+        raise StyleError("Trailing newlines not allowed", line=line_no, column=1)
+
 
 
 def _validate_newlines(input_str: str) -> None:
@@ -103,34 +104,43 @@ def _validate_newlines(input_str: str) -> None:
     while i < len(input_str):
         if input_str[i] == '\n':
             consecutive_newlines += 1
-            line_num += 1
             if consecutive_newlines > 2:
                 # Report error at the current line number (where the 3rd newline is)
-                raise StyleError(f"Too many consecutive newlines: maximum 2 allowed at line {line_num}")
+                raise StyleError(f"Too many consecutive newlines: maximum 2 allowed", line=line_num, column=1)
+            line_num += 1
+
         else:
             consecutive_newlines = 0
         i += 1
 
 
 def _validate_line_whitespace(input_str: str) -> None:
-    """Validate line-level whitespace rules."""
-    lines = input_str.split('\n')
-    for line_num, line in enumerate(lines, 1):
-        # Check for trailing spaces
-        if line != line.rstrip():
-            raise StyleError(f"Trailing spaces not allowed at line {line_num}")
-        
-        # Check for invalid leading spaces (not multiples of 4)
-        if line and not line.startswith('    ') and line.startswith(' '):
-            # Check if it's proper indentation (multiple of 4)
-            spaces = 0
-            for char in line:
-                if char == ' ':
-                    spaces += 1
-                else:
-                    break
-            if spaces % 4 != 0:
-                raise StyleError(f"Leading spaces not allowed at line {line_num}")
+    """Enforce two rules:
+       1. No trailing spaces.
+       2. Indentation must be multiples of 4 spaces (if any spaces are used).
+    """
+    for line_num, line in enumerate(input_str.split('\n'), 1):
+
+        # ---------- rule 1: trailing spaces ---------------------------------
+        if line and line[-1] == ' ':                    # at least one trailing space
+            column = len(line.rstrip()) + 1            # first trailing space (1-indexed)
+            raise StyleError(
+                "Trailing spaces not allowed",
+                line=line_num,
+                column=column
+            )
+
+        # ---------- rule 2: indentation multiple of 4 -----------------------
+        leading_spaces = len(line) - len(line.lstrip(' '))
+        if leading_spaces and leading_spaces % 4 != 0:
+            # first “bad” space is the one after the last full 4-space group
+            first_bad_col = (leading_spaces // 4) * 4 + 1  # 1-indexed
+            raise StyleError(
+                "Indentation must be in multiples of 4 spaces",
+                line=line_num,
+                column=first_bad_col
+            )
+
 
 
 def _validate_multiple_statements_per_line(input_str: str) -> None:
@@ -154,13 +164,14 @@ def _validate_multiple_statements_per_line(input_str: str) -> None:
                 keyword_count += 1
                 if keyword_count == 2:
                     raise StyleError(
-                        f"Statements must be separated by a newline at line {line_num}, column {word_pos + 1}"
+                        f"Statements must be separated by a newline"
+                        , line=line_num, column=word_pos + 1
                     )
             # Update current_pos to search for next word after this one
             current_pos = word_pos + len(word)
 
 
-def _validate_token_spacing(source_code: str, tokens: list[Token | IntegerToken | FloatToken | IdentifierToken]) -> None:
+def _validate_token_spacing(source_code: str) -> None:
     """
     Validate token-level spacing rules using both source and tokens.
     
@@ -187,18 +198,26 @@ def _validate_token_spacing(source_code: str, tokens: list[Token | IntegerToken 
 
 
 def _check_multiple_spaces_in_line(line: str, line_num: int) -> None:
-    """Check for multiple consecutive spaces between tokens."""
-    # Look for multiple spaces that aren't at the start of the line (indentation)
+    """
+    Disallow more than one consecutive space between tokens.
+    Leading indentation is ignored (that's handled elsewhere).
+    """
+    # Skip indentation
     i = 0
-    # Skip leading spaces (indentation)
     while i < len(line) and line[i] == ' ':
         i += 1
-    
-    # Check the rest of the line for multiple spaces
-    while i < len(line):
-        if line[i] == ' ' and i + 1 < len(line) and line[i + 1] == ' ':
-            raise StyleError(f"Multiple spaces not allowed between tokens at line {line_num}")
+
+    # Scan the remainder of the line
+    while i < len(line) - 1:
+        if line[i] == ' ' and line[i + 1] == ' ':
+            # First space of the run is the violation
+            raise StyleError(
+                "Multiple spaces not allowed between tokens",
+                line=line_num,
+                column=i + 1   
+            )
         i += 1
+
 
 
 def _check_operator_spacing_in_line(line: str, line_num: int) -> None:
@@ -209,7 +228,7 @@ def _check_operator_spacing_in_line(line: str, line_num: int) -> None:
         if char in operators and i > 0:
             # Check if previous character is alphanumeric (identifier or number)
             if line[i - 1].isalnum():
-                raise StyleError(f"Expected space before operator '{char}' at line {line_num}")
+                raise StyleError(f"Expected space before operator '{char}'", line=line_num, column=i+1)
 
 
 def _check_identifier_number_spacing_in_line(line: str, line_num: int) -> None:
@@ -225,7 +244,7 @@ def _check_identifier_number_spacing_in_line(line: str, line_num: int) -> None:
             # Check if identifier is followed immediately by alphanumeric
             if i < len(line) and line[i].isalnum():
                 identifier = line[start:i]
-                raise StyleError(f"Expected space after identifier: {identifier} at line {line_num}")
+                raise StyleError(f"Expected space after identifier '{identifier}'", line=line_num, column=i+1)
                 
         elif line[i].isdigit():
             # Found start of number
@@ -236,7 +255,7 @@ def _check_identifier_number_spacing_in_line(line: str, line_num: int) -> None:
             # Check if number is followed immediately by alphanumeric
             if i < len(line) and line[i].isalnum():
                 number = line[start:i]
-                raise StyleError(f"Expected space after number: {number} at line {line_num}")
+                raise StyleError(f"Expected space after number '{number}'", line=line_num, column=i+1)
         else:
             i += 1
 
@@ -252,7 +271,7 @@ def _validate_comment_spacing(input_str: str) -> None:
 
         # Must have exactly one space before the comment
         if line[comment_pos - 1] != ' ' or (comment_pos > 1 and line[comment_pos - 2] == ' '):
-            raise StyleError(f"Comments must be separated from code by exactly one space at line {line_num}")
+            raise StyleError(f"Comments must be separated from code by exactly one space", line=line_num, column=comment_pos+1)
 
 
 
@@ -268,12 +287,12 @@ def _validate_comma_spacing(input_str: str) -> None:
             if char == ',':
                 # Check for space before comma (not allowed)
                 if i > 0 and code_part[i - 1] == ' ':
-                    raise StyleError(f"Space before comma not allowed at line {line_num}")
+                    raise StyleError(f"Space before comma not allowed", line=line_num, column=i+1)
                 
                 # Check for space after comma (required)
                 if i + 1 >= len(code_part):
-                    raise StyleError(f"Space required after comma at line {line_num}")
+                    raise StyleError(f"Space required after comma", line=line_num, column=i+1)
                 elif code_part[i + 1] != ' ':
-                    raise StyleError(f"Space required after comma at line {line_num}")
+                    raise StyleError(f"Space required after comma", line=line_num, column=i+1)
 
 
