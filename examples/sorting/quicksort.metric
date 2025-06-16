@@ -25,7 +25,7 @@ def trim(arr list of integer, size integer) returns list of integer
     return copyslice(arr, 0, size)
 
 def quicksort(arr list of integer) returns list of integer
-    if len(arr) <= 1
+    if len(arr) ≤ 1
         return arr
     let pivot integer = arr[0]
     let n integer = len(arr)
@@ -38,7 +38,7 @@ def quicksort(arr list of integer) returns list of integer
         if arr[i] < pivot
             set less[lcount] = arr[i]
             set lcount = lcount + 1
-        if arr[i] >= pivot
+        if arr[i] ≥ pivot
             set greater[gcount] = arr[i]
             set gcount = gcount + 1
         set i = i + 1

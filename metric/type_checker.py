@@ -127,7 +127,7 @@ class TypeCheckVisitor(ASTVisitor):
         modulus_ops = {BinaryOperator.MODULUS}  # Modulus requires integer operands
         comparison_ops = {BinaryOperator.LESS_THAN, BinaryOperator.GREATER_THAN,
                          BinaryOperator.LESS_THAN_OR_EQUAL, BinaryOperator.GREATER_THAN_OR_EQUAL}
-        equality_ops = {BinaryOperator.EQUAL_EQUAL, BinaryOperator.NOT_EQUAL}
+        equality_ops = {BinaryOperator.IDENTICAL_TO, BinaryOperator.NOT_EQUAL}
         logical_ops = {BinaryOperator.AND, BinaryOperator.OR}  # Logical operators require boolean operands
         
         if node.operator in arithmetic_ops:

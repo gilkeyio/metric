@@ -60,7 +60,7 @@ metric-test
 
 ### Operators
 - **Arithmetic**: `+`, `-`, `*`, `/`, `%` with standard precedence (`* / %` before `+ -`)
-- **Comparison**: `<`, `>`, `<=`, `>=`, `==`, `!=` (lower precedence than arithmetic)
+- **Comparison**: `<`, `>`, `≤`, `≥`, `≡`, `≠` (lower precedence than arithmetic)
 - **Logical**: 
   - Binary: `and`, `or` (require boolean operands, `and` has higher precedence than `or`)
   - Unary: `not` (requires boolean operand, highest precedence among logical operators)
@@ -102,7 +102,7 @@ metric-test
 - **List assignment**: `set listName[index] = value` updates element at index
 - **List length**: `len(listName)` returns the number of elements
 - **Type safety**: Lists are homogeneous - all elements must be the same type
-- **Bounds checking**: Runtime error if index < 0 or index >= length
+- **Bounds checking**: Runtime error if index < 0 or index ≥ length
 
 ### Comments
 - **Line comments**: Start with `#` and continue to end of line
@@ -173,11 +173,11 @@ let x integer = 10
 let y integer = 5
 let isGreater boolean = x > y
 print isGreater
-let isEqual boolean = x == 10
+let isEqual boolean = x ≡ 10
 print isEqual
 let isFalse boolean = false
 print isFalse
-let comparison boolean = (x + y) >= 15
+let comparison boolean = (x + y) ≥ 15
 print comparison
 ```
 
@@ -214,9 +214,9 @@ print not b
 # Complex logical expressions with not
 let age integer = 25
 let hasLicense boolean = true
-let isMinor boolean = not (age >= 18)
+let isMinor boolean = not (age ≥ 18)
 let cannotDrive boolean = not hasLicense
-let canDrive boolean = age >= 18 and hasLicense and not cannotDrive
+let canDrive boolean = age ≥ 18 and hasLicense and not cannotDrive
 print isMinor
 print cannotDrive
 print canDrive
@@ -285,7 +285,7 @@ let isLargeSum boolean = sum > 20
 print sum
 print isLargeSum
 let difference integer = a - b
-let isSmallDiff boolean = difference <= 5
+let isSmallDiff boolean = difference ≤ 5
 print difference
 print isSmallDiff
 ```
@@ -320,7 +320,7 @@ done
 #### While Loops with Variable Mutation
 ```metric
 let counter integer = 1
-while counter <= 3
+while counter ≤ 3
     print counter
     set counter = counter + 1
 print finished
@@ -338,7 +338,7 @@ finished
 ```metric
 let x integer = 10
 while x > 0
-    if x == 5
+    if x ≡ 5
         print halfway
     print x
     set x = x - 2
@@ -363,13 +363,13 @@ let hasJob boolean = true
 let hasLicense boolean = true
 let income integer = 50000
 
-if age >= 18 and hasLicense
+if age ≥ 18 and hasLicense
     print canDrive
 
 if hasJob and income > 40000
     print goodIncome
 
-let qualified boolean = age >= 21 and hasJob and income > 30000
+let qualified boolean = age ≥ 21 and hasJob and income > 30000
 if qualified
     print eligible
 
@@ -404,7 +404,7 @@ def add(x integer, y integer) returns integer
     return x + y
 
 def factorial(n integer) returns integer
-    if n <= 1
+    if n ≤ 1
         return 1
     return n * factorial(n - 1)
 
@@ -429,7 +429,7 @@ Output:
 
 ```metric
 def isEven(n integer) returns boolean
-    return n % 2 == 0
+    return n % 2 ≡ 0
 
 def isOdd(n integer) returns boolean
     return not isEven(n)
@@ -438,13 +438,13 @@ def isPositive(n integer) returns boolean
     return n > 0
 
 def isNegative(n integer) returns boolean
-    return not isPositive(n) and n != 0
+    return not isPositive(n) and n ≠ 0
 
 def isEvenAndPositive(n integer) returns boolean
     return isEven(n) and isPositive(n)
 
 def isInvalidScore(score integer) returns boolean
-    return not (score >= 0 and score <= 100)
+    return not (score ≥ 0 and score ≤ 100)
 
 def isValidRange(value integer, min integer, max integer) returns boolean
     return not (value < min or value > max)

@@ -17,12 +17,12 @@ class Token(Enum):
     MODULUS = "Modulus"
     LEFT_PARENTHESIS = "LeftParenthesis"
     RIGHT_PARENTHESIS = "RightParenthesis"
-    EQUALS = "Equals"
+    ASSIGN = "Assign"
     LESS_THAN = "LessThan"
     GREATER_THAN = "GreaterThan"
     LESS_THAN_OR_EQUAL = "LessThanOrEqual"
     GREATER_THAN_OR_EQUAL = "GreaterThanOrEqual"
-    EQUAL_EQUAL = "EqualEqual"
+    IDENTICAL_TO = "IdenticalTo"
     NOT_EQUAL = "NotEqual"
     STATEMENT_SEPARATOR = "StatementSeparator"
     IF = "If"
@@ -290,12 +290,6 @@ def _get_keyword_token(identifier: str) -> TokenType:
             return IdentifierToken(identifier)
 
 
-def _peek(line_content: str, pos: int, expected: str) -> bool:
-    """Check if the string at pos matches the expected multi-character sequence."""
-    return (pos + len(expected) <= len(line_content) and 
-            line_content[pos:pos + len(expected)] == expected)
-
-
 def _is_negative_number_start(line_content: str, pos: int) -> bool:
     """Check if position starts a negative number (minus immediately followed by digit)."""
     return (line_content[pos] == '-' and 
@@ -314,29 +308,41 @@ def _tokenize_line_without_comments(line_content: str, line_num: int) -> list[To
         char = line_content[i]
         
         match char:
-            case ' ':
-                i += 1
+            case c if c.isdigit():
+                token, new_pos = _parse_number(line_content, i, line_num)
+                tokens.append(token)
+                i = new_pos
             
-            case '=' if _peek(line_content, i, '=='):
-                tokens.append(Token.EQUAL_EQUAL)
-                i += 2
-            
-            case '!' if _peek(line_content, i, '!='):
-                tokens.append(Token.NOT_EQUAL)
-                i += 2
-            
-            case '<' if _peek(line_content, i, '<='):
-                tokens.append(Token.LESS_THAN_OR_EQUAL)
-                i += 2
-            
-            case '>' if _peek(line_content, i, '>='):
-                tokens.append(Token.GREATER_THAN_OR_EQUAL)
-                i += 2
-            
+            case c if c.isalpha():
+                start = i
+                while i < len(line_content) and line_content[i].isalpha():
+                    i += 1
+                identifier = line_content[start:i]
+                tokens.append(_get_keyword_token(identifier))
+
             case '-' if _is_negative_number_start(line_content, i):
                 token, new_pos = _parse_number(line_content, i, line_num)
                 tokens.append(token)
                 i = new_pos
+
+            case ' ':
+                i += 1
+            
+            case '≡':
+                tokens.append(Token.IDENTICAL_TO)
+                i += 1
+            
+            case '≠':
+                tokens.append(Token.NOT_EQUAL)
+                i += 1
+            
+            case '≤':
+                tokens.append(Token.LESS_THAN_OR_EQUAL)
+                i += 1
+            
+            case '≥':
+                tokens.append(Token.GREATER_THAN_OR_EQUAL)
+                i += 1
             
             case '+':
                 tokens.append(Token.PLUS)
@@ -360,7 +366,7 @@ def _tokenize_line_without_comments(line_content: str, line_num: int) -> list[To
                 tokens.append(Token.RIGHT_PARENTHESIS)
                 i += 1
             case '=':
-                tokens.append(Token.EQUALS)
+                tokens.append(Token.ASSIGN)
                 i += 1
             case '<':
                 tokens.append(Token.LESS_THAN)
@@ -377,18 +383,7 @@ def _tokenize_line_without_comments(line_content: str, line_num: int) -> list[To
             case ']':
                 tokens.append(Token.RIGHT_BRACKET)
                 i += 1
-            
-            case c if c.isdigit():
-                token, new_pos = _parse_number(line_content, i, line_num)
-                tokens.append(token)
-                i = new_pos
-            
-            case c if c.isalpha():
-                start = i
-                while i < len(line_content) and line_content[i].isalpha():
-                    i += 1
-                identifier = line_content[start:i]
-                tokens.append(_get_keyword_token(identifier))
+
             
             case '\t':
                 raise TokenizerError("Unexpected character: '\\t'", line=line_num, column=i+1)

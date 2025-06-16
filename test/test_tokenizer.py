@@ -15,7 +15,7 @@ class TestTokenizer(unittest.TestCase):
     def test_tokenize_multiple_newlines(self)  -> None:
         # Multiple newlines now just create empty lines which are skipped
         result = tokenize("let x integer = 5\n\nprint x")
-        expected: list[TokenType] = [Token.LET, IdentifierToken("x"), Token.INTEGER_TYPE, Token.EQUALS, IntegerToken(5), Token.STATEMENT_SEPARATOR, 
+        expected: list[TokenType] = [Token.LET, IdentifierToken("x"), Token.INTEGER_TYPE, Token.ASSIGN, IntegerToken(5), Token.STATEMENT_SEPARATOR, 
                    Token.PRINT, IdentifierToken("x")]
         self.assertEqual(result, expected)
     
@@ -119,7 +119,7 @@ class TestTokenizer(unittest.TestCase):
     
     def test_tokenize_equals(self)  -> None:
         result = tokenize("=")
-        self.assertEqual(result, [Token.EQUALS])
+        self.assertEqual(result, [Token.ASSIGN])
     
     def test_tokenize_simple_expression_with_spaces(self)  -> None:
         result = tokenize("1 + 2")
@@ -127,7 +127,7 @@ class TestTokenizer(unittest.TestCase):
     
     def test_tokenize_let_statement(self)  -> None:
         result = tokenize("let x integer = 5")
-        self.assertEqual(result, [Token.LET, IdentifierToken("x"), Token.INTEGER_TYPE, Token.EQUALS, IntegerToken(5)])
+        self.assertEqual(result, [Token.LET, IdentifierToken("x"), Token.INTEGER_TYPE, Token.ASSIGN, IntegerToken(5)])
     
     def test_tokenize_print_statement(self)  -> None:
         result = tokenize("print x")
@@ -141,7 +141,7 @@ class TestTokenizer(unittest.TestCase):
     
     def test_tokenize_multiple_statements_with_newlines(self)  -> None:
         result = tokenize("let x integer = 5\nprint x")
-        expected: list[TokenType] = [Token.LET, IdentifierToken("x"), Token.INTEGER_TYPE, Token.EQUALS, IntegerToken(5), 
+        expected: list[TokenType] = [Token.LET, IdentifierToken("x"), Token.INTEGER_TYPE, Token.ASSIGN, IntegerToken(5), 
                    Token.STATEMENT_SEPARATOR, Token.PRINT, IdentifierToken("x")]
         self.assertEqual(result, expected)
     
@@ -180,25 +180,25 @@ class TestTokenizer(unittest.TestCase):
         self.assertEqual(result, [IntegerToken(10), Token.GREATER_THAN, IntegerToken(5)])
     
     def test_tokenize_less_than_or_equal(self)  -> None:
-        result = tokenize("5 <= 10")
+        result = tokenize("5 ≤ 10")
         self.assertEqual(result, [IntegerToken(5), Token.LESS_THAN_OR_EQUAL, IntegerToken(10)])
     
     def test_tokenize_greater_than_or_equal(self)  -> None:
-        result = tokenize("10 >= 5")
+        result = tokenize("10 ≥ 5")
         self.assertEqual(result, [IntegerToken(10), Token.GREATER_THAN_OR_EQUAL, IntegerToken(5)])
     
     def test_tokenize_equal_equal(self)  -> None:
-        result = tokenize("5 == 5")
-        self.assertEqual(result, [IntegerToken(5), Token.EQUAL_EQUAL, IntegerToken(5)])
+        result = tokenize("5 ≡ 5")
+        self.assertEqual(result, [IntegerToken(5), Token.IDENTICAL_TO, IntegerToken(5)])
     
     def test_tokenize_not_equal(self)  -> None:
-        result = tokenize("5 != 3")
+        result = tokenize("5 ≠ 3")
         self.assertEqual(result, [IntegerToken(5), Token.NOT_EQUAL, IntegerToken(3)])
     
     # Boolean expressions with variables
     def test_tokenize_boolean_expression(self)  -> None:
         result = tokenize("let result = x > y")
-        expected: list[TokenType] = [Token.LET, IdentifierToken("result"), Token.EQUALS, IdentifierToken("x"), Token.GREATER_THAN, IdentifierToken("y")]
+        expected: list[TokenType] = [Token.LET, IdentifierToken("result"), Token.ASSIGN, IdentifierToken("x"), Token.GREATER_THAN, IdentifierToken("y")]
         self.assertEqual(result, expected)
     
     def test_tokenize_print_boolean(self)  -> None:
@@ -224,7 +224,7 @@ class TestTokenizer(unittest.TestCase):
         result = tokenize(code)
         expected: list[TokenType] = [
             Token.IF, Token.TRUE, Token.STATEMENT_SEPARATOR,
-            Token.INDENT, Token.LET, IdentifierToken("x"), Token.EQUALS, IntegerToken(5), Token.STATEMENT_SEPARATOR,
+            Token.INDENT, Token.LET, IdentifierToken("x"), Token.ASSIGN, IntegerToken(5), Token.STATEMENT_SEPARATOR,
             Token.PRINT, IdentifierToken("x"), Token.DEDENT
         ]
         self.assertEqual(result, expected)
@@ -253,12 +253,12 @@ print y""")
         code = code_block("""while true
     set x = x + 1""")
         result = tokenize(code)
-        expected: list[TokenType] = [Token.WHILE, Token.TRUE, Token.STATEMENT_SEPARATOR, Token.INDENT, Token.SET, IdentifierToken("x"), Token.EQUALS, IdentifierToken("x"), Token.PLUS, IntegerToken(1), Token.DEDENT]
+        expected: list[TokenType] = [Token.WHILE, Token.TRUE, Token.STATEMENT_SEPARATOR, Token.INDENT, Token.SET, IdentifierToken("x"), Token.ASSIGN, IdentifierToken("x"), Token.PLUS, IntegerToken(1), Token.DEDENT]
         self.assertEqual(result, expected)
     
     def test_tokenize_set_statement(self)  -> None:
         result = tokenize("set counter = counter + 1")
-        expected: list[TokenType] = [Token.SET, IdentifierToken("counter"), Token.EQUALS, IdentifierToken("counter"), Token.PLUS, IntegerToken(1)]
+        expected: list[TokenType] = [Token.SET, IdentifierToken("counter"), Token.ASSIGN, IdentifierToken("counter"), Token.PLUS, IntegerToken(1)]
         self.assertEqual(result, expected)
     
     # Type annotation tests
@@ -272,12 +272,12 @@ print y""")
     
     def test_tokenize_typed_let_statement(self)  -> None:
         result = tokenize("let x integer = 5")
-        expected: list[TokenType] = [Token.LET, IdentifierToken("x"), Token.INTEGER_TYPE, Token.EQUALS, IntegerToken(5)]
+        expected: list[TokenType] = [Token.LET, IdentifierToken("x"), Token.INTEGER_TYPE, Token.ASSIGN, IntegerToken(5)]
         self.assertEqual(result, expected)
     
     def test_tokenize_typed_boolean_let(self)  -> None:
         result = tokenize("let flag boolean = true")
-        expected: list[TokenType] = [Token.LET, IdentifierToken("flag"), Token.BOOLEAN_TYPE, Token.EQUALS, Token.TRUE]
+        expected: list[TokenType] = [Token.LET, IdentifierToken("flag"), Token.BOOLEAN_TYPE, Token.ASSIGN, Token.TRUE]
         self.assertEqual(result, expected)
     
     def test_tokenize_complex_typed_program(self)  -> None:
@@ -286,8 +286,8 @@ let y boolean = x > 5
 print y""")
         result = tokenize(code)
         expected: list[TokenType] = [
-            Token.LET, IdentifierToken("x"), Token.INTEGER_TYPE, Token.EQUALS, IntegerToken(10), Token.STATEMENT_SEPARATOR,
-            Token.LET, IdentifierToken("y"), Token.BOOLEAN_TYPE, Token.EQUALS, IdentifierToken("x"), Token.GREATER_THAN, IntegerToken(5), Token.STATEMENT_SEPARATOR,
+            Token.LET, IdentifierToken("x"), Token.INTEGER_TYPE, Token.ASSIGN, IntegerToken(10), Token.STATEMENT_SEPARATOR,
+            Token.LET, IdentifierToken("y"), Token.BOOLEAN_TYPE, Token.ASSIGN, IdentifierToken("x"), Token.GREATER_THAN, IntegerToken(5), Token.STATEMENT_SEPARATOR,
             Token.PRINT, IdentifierToken("y")
         ]
         self.assertEqual(result, expected)
@@ -299,7 +299,7 @@ print y""")
     
     def test_tokenize_modulus_expression(self)  -> None:
         result = tokenize("let remainder integer = x % y")
-        expected: list[TokenType] = [Token.LET, IdentifierToken("remainder"), Token.INTEGER_TYPE, Token.EQUALS, IdentifierToken("x"), Token.MODULUS, IdentifierToken("y")]
+        expected: list[TokenType] = [Token.LET, IdentifierToken("remainder"), Token.INTEGER_TYPE, Token.ASSIGN, IdentifierToken("x"), Token.MODULUS, IdentifierToken("y")]
         self.assertEqual(result, expected)
     
     # Float literal tests
@@ -326,12 +326,12 @@ print y""")
     
     def test_tokenize_typed_float_let(self)  -> None:
         result = tokenize("let pi float = 3.14")
-        expected: list[TokenType] = [Token.LET, IdentifierToken("pi"), Token.FLOAT_TYPE, Token.EQUALS, FloatToken(3.14)]
+        expected: list[TokenType] = [Token.LET, IdentifierToken("pi"), Token.FLOAT_TYPE, Token.ASSIGN, FloatToken(3.14)]
         self.assertEqual(result, expected)
     
     def test_tokenize_mixed_int_float_expression(self)  -> None:
         result = tokenize("let result float = 5 + 3.14")
-        expected: list[TokenType] = [Token.LET, IdentifierToken("result"), Token.FLOAT_TYPE, Token.EQUALS, IntegerToken(5), Token.PLUS, FloatToken(3.14)]
+        expected: list[TokenType] = [Token.LET, IdentifierToken("result"), Token.FLOAT_TYPE, Token.ASSIGN, IntegerToken(5), Token.PLUS, FloatToken(3.14)]
         self.assertEqual(result, expected)
     
     def test_tokenize_fails_with_incomplete_float(self)  -> None:
@@ -352,7 +352,7 @@ print y""")
     
     def test_tokenize_comment_after_statement(self)  -> None:
         result = tokenize("let x integer = 5 # This is a comment")
-        expected: list[TokenType] = [Token.LET, IdentifierToken("x"), Token.INTEGER_TYPE, Token.EQUALS, IntegerToken(5), Token.COMMENT]
+        expected: list[TokenType] = [Token.LET, IdentifierToken("x"), Token.INTEGER_TYPE, Token.ASSIGN, IntegerToken(5), Token.COMMENT]
         self.assertEqual(result, expected)
     
     def test_tokenize_comment_with_proper_indentation(self)  -> None:
@@ -365,7 +365,7 @@ print y""")
 print x # Print the value""")
         result = tokenize(code)
         expected: list[TokenType] = [
-            Token.LET, IdentifierToken("x"), Token.INTEGER_TYPE, Token.EQUALS, IntegerToken(5), Token.COMMENT, Token.STATEMENT_SEPARATOR,
+            Token.LET, IdentifierToken("x"), Token.INTEGER_TYPE, Token.ASSIGN, IntegerToken(5), Token.COMMENT, Token.STATEMENT_SEPARATOR,
             Token.PRINT, IdentifierToken("x"), Token.COMMENT
         ]
         self.assertEqual(result, expected)
@@ -398,7 +398,7 @@ print x # Print the value""")
 print x""")
         result = tokenize(code)
         expected: list[TokenType] = [
-            Token.LET, IdentifierToken("x"), Token.INTEGER_TYPE, Token.EQUALS, IntegerToken(5), Token.STATEMENT_SEPARATOR,
+            Token.LET, IdentifierToken("x"), Token.INTEGER_TYPE, Token.ASSIGN, IntegerToken(5), Token.STATEMENT_SEPARATOR,
             Token.COMMENT, Token.STATEMENT_SEPARATOR,
             Token.PRINT, IdentifierToken("x")
         ]
@@ -477,7 +477,7 @@ print x""")
         result = tokenize(code)
         expected : list[TokenType] = [
             Token.LET, IdentifierToken("nums"), Token.LIST, Token.OF, Token.INTEGER_TYPE,
-            Token.EQUALS, Token.LEFT_BRACKET, IntegerToken(1), Token.COMMA, IntegerToken(2),
+            Token.ASSIGN, Token.LEFT_BRACKET, IntegerToken(1), Token.COMMA, IntegerToken(2),
             Token.COMMA, IntegerToken(3), Token.RIGHT_BRACKET
         ]
         self.assertEqual(result, expected)
@@ -543,7 +543,7 @@ print x""")
         result = tokenize(code)
         expected : list[TokenType] = [
             Token.SET, IdentifierToken("nums"), Token.LEFT_BRACKET, IntegerToken(1),
-            Token.RIGHT_BRACKET, Token.EQUALS, IntegerToken(42)
+            Token.RIGHT_BRACKET, Token.ASSIGN, IntegerToken(42)
         ]
         self.assertEqual(result, expected)
     
@@ -563,7 +563,7 @@ print x""")
         result = tokenize(code)
         expected : list[TokenType] = [
             Token.LET, IdentifierToken("zeros"), Token.LIST, Token.OF, Token.BOOLEAN_TYPE,
-            Token.EQUALS, Token.REPEAT, Token.LEFT_PARENTHESIS, Token.FALSE, Token.COMMA,
+            Token.ASSIGN, Token.REPEAT, Token.LEFT_PARENTHESIS, Token.FALSE, Token.COMMA,
             Token.LEN, Token.LEFT_PARENTHESIS, IdentifierToken("other"), Token.RIGHT_PARENTHESIS,
             Token.RIGHT_PARENTHESIS
         ]
@@ -626,7 +626,7 @@ print x""")
     def test_tokenize_negative_integer_in_expression(self)  -> None:
         """Test tokenizing negative integers in expressions."""
         result = tokenize("let x integer = -42")
-        expected : list[TokenType] = [Token.LET, IdentifierToken("x"), Token.INTEGER_TYPE, Token.EQUALS, IntegerToken(-42)]
+        expected : list[TokenType] = [Token.LET, IdentifierToken("x"), Token.INTEGER_TYPE, Token.ASSIGN, IntegerToken(-42)]
         self.assertEqual(result, expected)
     
     def test_tokenize_negative_integer_arithmetic(self)  -> None:
@@ -653,7 +653,7 @@ print x""")
     def test_tokenize_negative_float_in_expression(self)  -> None:
         """Test tokenizing negative floats in expressions."""
         result = tokenize("let pi float = -3.14")
-        expected : list[TokenType] = [Token.LET, IdentifierToken("pi"), Token.FLOAT_TYPE, Token.EQUALS, FloatToken(-3.14)]
+        expected : list[TokenType] = [Token.LET, IdentifierToken("pi"), Token.FLOAT_TYPE, Token.ASSIGN, FloatToken(-3.14)]
         self.assertEqual(result, expected)
     
     def test_tokenize_negative_float_arithmetic(self)  -> None:
@@ -708,7 +708,7 @@ print x""")
         """Test tokenizing code with empty lines between statements."""
         code = "let x integer = 5\n\nprint x"
         result = tokenize(code)
-        expected: list[TokenType] = [Token.LET, IdentifierToken("x"), Token.INTEGER_TYPE, Token.EQUALS, IntegerToken(5), Token.STATEMENT_SEPARATOR, 
+        expected: list[TokenType] = [Token.LET, IdentifierToken("x"), Token.INTEGER_TYPE, Token.ASSIGN, IntegerToken(5), Token.STATEMENT_SEPARATOR, 
                    Token.PRINT, IdentifierToken("x")]
         self.assertEqual(result, expected)
 

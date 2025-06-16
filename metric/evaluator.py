@@ -250,7 +250,7 @@ def evaluate_expression(env: Environment, expr: Expression) -> RuntimeValue:
                                 left_num = ensure_numeric(left)
                                 right_num = ensure_numeric(right)
                                 return left_num >= right_num
-                            case BinaryOperator.EQUAL_EQUAL:
+                            case BinaryOperator.IDENTICAL_TO:
                                 return left == right
                             case BinaryOperator.NOT_EQUAL:
                                 return left != right

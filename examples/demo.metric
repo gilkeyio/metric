@@ -26,10 +26,10 @@ print false or false
 # Complex logical expressions
 let age integer = 25
 let hasLicense boolean = true
-let canDrive boolean = age >= 18 and hasLicense
+let canDrive boolean = age ≥ 18 and hasLicense
 print canDrive
 
 if age > 21 and hasLicense
     print 999
-if age < 16 or hasLicense == false
+if age < 16 or hasLicense ≡ false
     print 111

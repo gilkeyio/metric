@@ -30,10 +30,10 @@ print hasElements and isShort
 if len(nums) > 3 and nums[0] > 0
     print 777
 
-let isEmpty boolean = len(zeros) == 0
+let isEmpty boolean = len(zeros) ≡ 0
 let isNotEmpty boolean = len(nums) > 0
 print isEmpty or isNotEmpty
 
 # Using logical operators in conditions with list access
-if nums[0] == 1 and nums[4] == 5
+if nums[0] ≡ 1 and nums[4] ≡ 5
     print 888

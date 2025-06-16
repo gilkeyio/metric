@@ -394,14 +394,14 @@ class TestTypeSystem(unittest.TestCase):
     
     def test_parser_error_missing_type(self)  -> None:
         """Test parser error when type annotation is missing."""
-        tokens: list[TokenType] = [Token.LET, IdentifierToken("x"), Token.EQUALS, IntegerToken(5)]
+        tokens: list[TokenType] = [Token.LET, IdentifierToken("x"), Token.ASSIGN, IntegerToken(5)]
         with self.assertRaises(ParseError) as cm:
             parse(tokens)
         self.assertIn("Expected 'let identifier type = expression'", str(cm.exception))
     
     def test_parser_error_invalid_type(self)  -> None:
         """Test parser error when invalid type is provided."""
-        tokens: list[TokenType] = [Token.LET, IdentifierToken("x"), IdentifierToken("string"), Token.EQUALS, IntegerToken(5)]
+        tokens: list[TokenType] = [Token.LET, IdentifierToken("x"), IdentifierToken("string"), Token.ASSIGN, IntegerToken(5)]
         with self.assertRaises(ParseError) as cm:
             parse(tokens)
         self.assertIn("Expected type annotation (integer, boolean, or float)", str(cm.exception))

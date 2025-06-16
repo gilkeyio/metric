@@ -37,10 +37,10 @@ if not (x < 5)
 
 # Function with not operator
 def isNotZero(n integer) returns boolean
-    return not (n == 0)
+    return not (n ≡ 0)
 
 def isOutOfRange(value integer, min integer, max integer) returns boolean
-    return not (value >= min and value <= max)
+    return not (value ≥ min and value ≤ max)
 
 print isNotZero(10)
 print isNotZero(0)
@@ -52,11 +52,11 @@ let age integer = 20
 let hasPermit boolean = true
 let hasExperience boolean = false
 
-let cannotDriveAlone boolean = not (age >= 18 and hasPermit and hasExperience)
+let cannotDriveAlone boolean = not (age ≥ 18 and hasPermit and hasExperience)
 print cannotDriveAlone
 
 # While loop with not
 let counter integer = 5
-while not (counter == 0)
+while not (counter ≡ 0)
     print counter
     set counter = counter - 1

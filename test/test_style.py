@@ -11,9 +11,7 @@ from test.test_utils import code_block
 class TestStyleValidation(unittest.TestCase):
     """Comprehensive tests for Metric language whitespace and style validation."""
     
-    # ========================================================================
     # Line Ending Validation Tests
-    # ========================================================================
     
     def test_carriage_return_at_start(self)  -> None:
         code = code_block("""
@@ -99,9 +97,7 @@ class TestStyleValidation(unittest.TestCase):
             validate_style(code, tokens)
         self.assertEqual(str(cm.exception), "[Line 2, Column 9] Style Error | Carriage return newlines not allowed; use \\n only")
     
-    # ========================================================================
     # Leading/Trailing Newline Tests  
-    # ========================================================================
     
     def test_leading_newline_single(self)  -> None:
         code = code_block("""
@@ -199,9 +195,7 @@ class TestStyleValidation(unittest.TestCase):
             validate_style(code, tokens)
         self.assertEqual(str(cm.exception), "[Line 1, Column 1] Style Error | Program must not be empty")
     
-    # ========================================================================
     # Consecutive Newline Tests
-    # ========================================================================
     
     def test_single_newline_valid(self)  -> None:
         code = code_block("""
@@ -317,9 +311,7 @@ class TestStyleValidation(unittest.TestCase):
         tokens = tokenize(code)
         validate_style(code, tokens)
     
-    # ========================================================================
     # Line Whitespace Tests
-    # ========================================================================
     
     def test_trailing_spaces_first_line(self)  -> None:
         code = code_block("""
@@ -450,9 +442,7 @@ class TestStyleValidation(unittest.TestCase):
         
         self.assertIn("Invalid indentation", str(cm.exception))
     
-    # ========================================================================
     # Token Spacing Tests
-    # ========================================================================
     
     def test_multiple_spaces_between_tokens_start(self)  -> None:
         code = code_block("""
@@ -553,9 +543,7 @@ class TestStyleValidation(unittest.TestCase):
             validate_style(code, tokens)
         self.assertEqual(str(cm.exception), "[Line 1, Column 18] Style Error | Expected space after number '5'")
     
-    # ========================================================================
     # Comment Spacing Tests
-    # ========================================================================
     
     def test_no_space_before_inline_comment_start(self)  -> None:
         code = code_block("""
@@ -635,9 +623,7 @@ class TestStyleValidation(unittest.TestCase):
         
         self.assertIn("Invalid indentation", str(cm.exception))
     
-    # ========================================================================
     # Comma Spacing Tests
-    # ========================================================================
     
     def test_space_before_comma_function_params(self)  -> None:
         code = code_block("""
@@ -705,9 +691,7 @@ class TestStyleValidation(unittest.TestCase):
         tokens = tokenize(code)
         validate_style(code, tokens)
     
-    # ========================================================================
     # Multiple Statement Validation Tests
-    # ========================================================================
     
     def test_multiple_statements_first_line(self)  -> None:
         code = code_block("""
